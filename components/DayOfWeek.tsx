@@ -56,20 +56,20 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   dayButton: {
-    backgroundColor: "#DDDDDD",
+    backgroundColor: "#ffffff",
     padding: 5,
     margin: 5,
     borderRadius: 5,
   },
   selectedDayButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#000000",
   },
   dayButtonText: {
     fontSize: 16,
     color: "#000000",
   },
   selectedDayButtonText: {
-    color: "#FFFFFF",
+    color: "#ffffff",
   },
 });
 

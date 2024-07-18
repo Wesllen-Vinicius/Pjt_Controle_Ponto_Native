@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import React from "react";
 import "react-native-gesture-handler";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
@@ -11,17 +10,21 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarStyle: {
+          backgroundColor: "#ffffff", // Componentes
+        },
+        tabBarActiveTintColor: "#24B7B8", // Acento
+        tabBarInactiveTintColor: "#5c5b5b", // Cor para ícones inativos
         headerShown: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "History",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "home" : "home-outline"}
+              name={focused ? "time" : "time-outline"} // Ícone de histórico
               color={color}
             />
           ),
@@ -30,10 +33,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "Explore",
+          title: "Home",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
+              name={focused ? "home" : "home-outline"} // Ícone de casa
               color={color}
             />
           ),
@@ -42,10 +45,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="register"
         options={{
-          title: "Registro",
+          title: "Config",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
+              name={focused ? "settings" : "settings-outline"} // Ícone de engrenagem
               color={color}
             />
           ),
