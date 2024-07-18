@@ -59,7 +59,7 @@ export default function RegistroScreen() {
       </ThemedView>
 
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Dias da Semana</ThemedText>
+        <ThemedText type="subtitle">Dias da Semanas</ThemedText>
         <ThemedText type="subtitle">
           <CalendarDayOfWeek />
         </ThemedText>
