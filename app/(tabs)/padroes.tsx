@@ -16,23 +16,48 @@ import CalendarDayOfWeek from "@/components/DayOfWeek";
 import Header from "@/components/Header";
 
 export default function RegistroScreen() {
-  const [showPicker, setShowPicker] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState<
+    "defaultTime" | "intervalTime" | null
+  >(null);
+  const [defaultTime, setDefaultTime] = useState<Date | null>(null);
+  const [intervalTime, setIntervalTime] = useState<Date | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (event.type === "dismissed") {
-      setShowPicker(false);
+      setShowPicker(null);
       return;
     }
-    const currentDate = selectedDate || date;
-    setDate(currentDate);
-    setShowPicker(Platform.OS === "ios");
+
+    const currentDate = selectedDate || new Date();
+    if (showPicker === "defaultTime") {
+      setDefaultTime(currentDate);
+    } else if (showPicker === "intervalTime") {
+      setIntervalTime(currentDate);
+    }
+    setShowPicker(Platform.OS === "ios" ? showPicker : null);
+  };
+
+  const formatTime = (date: Date | null) => {
+    if (!date) return "00:00";
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
   };
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
+
+  const buttonStyle = (isSelected: boolean) => ({
+    ...styles.confirmButtonHour,
+    backgroundColor: isSelected ? "black" : "#ddd",
+  });
+
+  const buttonTextStyle = (isSelected: boolean) => ({
+    ...styles.confirmButtonText,
+    color: isSelected ? "white" : "black",
+  });
 
   return (
     <SafeAreaView
@@ -54,18 +79,19 @@ export default function RegistroScreen() {
         <ThemedView style={styles.stepContainer}>
           <ThemedText type="subtitle">Hora Padrão</ThemedText>
           <TouchableOpacity
-            style={styles.confirmButtonHour}
-            onPress={() => setShowPicker(true)}
+            style={buttonStyle(!!defaultTime)}
+            onPress={() => setShowPicker("defaultTime")}
           >
-            <ThemedText type="subtitle">{`${date.getHours()}:${date.getMinutes()}`}</ThemedText>
+            <ThemedText type="subtitle" style={buttonTextStyle(!!defaultTime)}>
+              {formatTime(defaultTime)}
+            </ThemedText>
           </TouchableOpacity>
-          {showPicker && (
+          {showPicker === "defaultTime" && (
             <RNDateTimePicker
-              display="spinner"
+              display="inline"
               mode="time"
-              value={date}
+              value={defaultTime || new Date()}
               onChange={onChange}
-              locale="pt-BR"
             />
           )}
         </ThemedView>
@@ -76,16 +102,18 @@ export default function RegistroScreen() {
         <ThemedView style={styles.stepContainer}>
           <ThemedText type="subtitle">Intervalo Padrão</ThemedText>
           <TouchableOpacity
-            style={styles.confirmButtonHour}
-            onPress={() => setShowPicker(true)}
+            style={buttonStyle(!!intervalTime)}
+            onPress={() => setShowPicker("intervalTime")}
           >
-            <ThemedText type="subtitle">{`${date.getHours()}:${date.getMinutes()}`}</ThemedText>
+            <ThemedText type="subtitle" style={buttonTextStyle(!!intervalTime)}>
+              {formatTime(intervalTime)}
+            </ThemedText>
           </TouchableOpacity>
-          {showPicker && (
+          {showPicker === "intervalTime" && (
             <RNDateTimePicker
-              display="spinner"
+              display="inline"
               mode="time"
-              value={date}
+              value={intervalTime || new Date()}
               onChange={onChange}
               locale="pt-BR"
             />
@@ -93,7 +121,7 @@ export default function RegistroScreen() {
         </ThemedView>
         <TouchableOpacity style={styles.confirmButton}>
           <ThemedText type="subtitle" style={styles.confirmButtonText}>
-            Definir
+            Confirmar
           </ThemedText>
         </TouchableOpacity>
       </View>
@@ -110,10 +138,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   darkBackground: {
-    backgroundColor: "#f3efef", // Fundo principal
+    backgroundColor: "#f3efef",
   },
   lightBackground: {
-    backgroundColor: "#f3efef", // Fundo principal
+    backgroundColor: "#f3efef",
   },
   titleContainer: {
     backgroundColor: "#f3efef",
@@ -125,19 +153,19 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     borderRadius: 12,
-    backgroundColor: "#24B7B8", // Componentes
+    backgroundColor: "#24B7B8",
   },
   confirmButtonHour: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: "#ffffff", // Acento
+    backgroundColor: "#ffffff",
     alignItems: "center",
     marginTop: 8,
     width: "100%",
   },
   confirmButton: {
-    backgroundColor: "#000707", // Acento
+    backgroundColor: "#000707",
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -145,7 +173,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   confirmButtonText: {
-    color: "#ffffff", // Fundo principal
+    color: "#ffffff",
     fontSize: 16,
   },
 });

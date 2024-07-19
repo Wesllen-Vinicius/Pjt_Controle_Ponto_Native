@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({
           <Icon
             name={isDarkMode ? "brightness-3" : "brightness-7"}
             size={24}
-            color="#070707" // Acento
+            color="#070707"
           />
         </TouchableOpacity>
       </View>
@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: "#24B7B8", // Acento
+    backgroundColor: "#24B7B8",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   header: {
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   appName: {
-    color: "#000000", // Fundo principal
+    color: "#000000",
     fontSize: 20,
     fontWeight: "bold",
   },

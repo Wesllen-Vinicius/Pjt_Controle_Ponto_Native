@@ -11,10 +11,10 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: "#ffffff", // Componentes
+          backgroundColor: "#ffffff",
         },
-        tabBarActiveTintColor: "#24B7B8", // Acento
-        tabBarInactiveTintColor: "#5c5b5b", // Cor para ícones inativos
+        tabBarActiveTintColor: "#24B7B8",
+        tabBarInactiveTintColor: "#5c5b5b",
         headerShown: false,
       }}
     >
@@ -24,7 +24,7 @@ export default function TabLayout() {
           title: "History",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "time" : "time-outline"} // Ícone de histórico
+              name={focused ? "time" : "time-outline"}
               color={color}
             />
           ),
@@ -36,19 +36,19 @@ export default function TabLayout() {
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "home" : "home-outline"} // Ícone de casa
+              name={focused ? "home" : "home-outline"}
               color={color}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="register"
+        name="padroes"
         options={{
           title: "Config",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "settings" : "settings-outline"} // Ícone de engrenagem
+              name={focused ? "settings" : "settings-outline"}
               color={color}
             />
           ),
