@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import "react-native-gesture-handler";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { SQLiteProvider } from "expo-sqlite";
+import { initializeDatabase } from "@/database/initializeDatabase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,10 +33,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <SQLiteProvider databaseName="teste.db" onInit={initializeDatabase}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
+    </SQLiteProvider>
+
     </ThemeProvider>
   );
 }
