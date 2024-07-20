@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  Platform,
   View,
+  TextStyle,
+  ViewStyle,
 } from "react-native";
 import RNDateTimePicker, {
   DateTimePickerEvent,
@@ -14,14 +15,24 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import CalendarDayOfWeek from "@/components/DayOfWeek";
 import Header from "@/components/Header";
+import { useDarkMode } from "@/context/DarkModeContext";
 
-export default function RegistroScreen() {
+const RegistroScreen = () => {
   const [showPicker, setShowPicker] = useState<
     "defaultTime" | "intervalTime" | null
   >(null);
   const [defaultTime, setDefaultTime] = useState<Date | null>(null);
   const [intervalTime, setIntervalTime] = useState<Date | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
+  const [confirmedDefaultTime, setConfirmedDefaultTime] = useState<Date | null>(
+    null
+  );
+  const [confirmedIntervalTime, setConfirmedIntervalTime] =
+    useState<Date | null>(null);
+  const [confirmedDays, setConfirmedDays] = useState<string[]>([]);
+
+  const { isDarkMode } = useDarkMode();
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (event.type === "dismissed") {
@@ -30,12 +41,15 @@ export default function RegistroScreen() {
     }
 
     const currentDate = selectedDate || new Date();
+    console.log("Selected date:", currentDate);
+
     if (showPicker === "defaultTime") {
       setDefaultTime(currentDate);
     } else if (showPicker === "intervalTime") {
       setIntervalTime(currentDate);
     }
-    setShowPicker(Platform.OS === "ios" ? showPicker : null);
+
+    setShowPicker(null);
   };
 
   const formatTime = (date: Date | null) => {
@@ -45,18 +59,66 @@ export default function RegistroScreen() {
     return `${hours}:${minutes}`;
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
+  const handleDaySelection = (day: string) => {
+    setSelectedDays((prevSelectedDays) =>
+      prevSelectedDays.includes(day)
+        ? prevSelectedDays.filter((d) => d !== day)
+        : [...prevSelectedDays, day]
+    );
   };
 
-  const buttonStyle = (isSelected: boolean) => ({
-    ...styles.confirmButtonHour,
-    backgroundColor: isSelected ? "black" : "#ddd",
+  useEffect(() => {
+    const hasChanges = () => {
+      const isDefaultTimeChanged = defaultTime !== confirmedDefaultTime;
+      const isIntervalTimeChanged = intervalTime !== confirmedIntervalTime;
+      const areDaysChanged =
+        selectedDays.sort().toString() !== confirmedDays.sort().toString();
+      return isDefaultTimeChanged || isIntervalTimeChanged || areDaysChanged;
+    };
+
+    setIsConfirmButtonDisabled(!hasChanges());
+  }, [
+    defaultTime,
+    intervalTime,
+    selectedDays,
+    confirmedDefaultTime,
+    confirmedIntervalTime,
+    confirmedDays,
+  ]);
+
+  const handleConfirm = () => {
+    setConfirmedDefaultTime(defaultTime);
+    setConfirmedIntervalTime(intervalTime);
+    setConfirmedDays(selectedDays);
+    setIsConfirmButtonDisabled(true);
+    // Lógica para salvar os dados no banco de dados...
+  };
+
+  const buttonStyle = (isSelected: boolean): ViewStyle => ({
+    backgroundColor: isSelected
+      ? isDarkMode
+        ? "#FFFFFF"
+        : "#161B22"
+      : isDarkMode
+      ? "#010409"
+      : "#bdb9b9",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 8,
+    width: "100%",
   });
 
-  const buttonTextStyle = (isSelected: boolean) => ({
-    ...styles.confirmButtonText,
-    color: isSelected ? "white" : "black",
+  const buttonTextStyle = (isSelected: boolean): TextStyle => ({
+    color: isSelected
+      ? isDarkMode
+        ? "#000000"
+        : "#FFFFFF"
+      : isDarkMode
+      ? "#FFFFFF"
+      : "#161B22",
+    fontSize: 16,
   });
 
   return (
@@ -67,17 +129,29 @@ export default function RegistroScreen() {
       ]}
     >
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
-      <Header
-        appName="Controle de Ponto"
-        onToggleDarkMode={toggleDarkMode}
-        isDarkMode={isDarkMode}
-      />
+      <Header appName="Padrões de Ponto" />
       <View style={styles.content}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Padrões</ThemedText>
-        </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Hora Padrão</ThemedText>
+        {/* <ThemedView style={styles.titleContainer}>
+          {/* <ThemedText
+            type="title"
+            style={isDarkMode ? styles.darkText : styles.lightText}
+          >
+            Padrões
+          </ThemedText> */}
+        {/* </ThemedView> */}
+
+        <ThemedView
+          style={[
+            styles.stepContainer,
+            isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
+          ]}
+        >
+          <ThemedText
+            type="subtitle"
+            style={isDarkMode ? styles.darkText : styles.lightText}
+          >
+            Hora Padrão
+          </ThemedText>
           <TouchableOpacity
             style={buttonStyle(!!defaultTime)}
             onPress={() => setShowPicker("defaultTime")}
@@ -88,19 +162,44 @@ export default function RegistroScreen() {
           </TouchableOpacity>
           {showPicker === "defaultTime" && (
             <RNDateTimePicker
-              display="inline"
+              display="default"
               mode="time"
               value={defaultTime || new Date()}
               onChange={onChange}
             />
           )}
         </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Dias da Semana</ThemedText>
-          <CalendarDayOfWeek />
+
+        <ThemedView
+          style={[
+            styles.stepContainer,
+            isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
+          ]}
+        >
+          <ThemedText
+            type="subtitle"
+            style={isDarkMode ? styles.darkText : styles.lightText}
+          >
+            Dias da Semana
+          </ThemedText>
+          <CalendarDayOfWeek
+            onDayChange={handleDaySelection}
+            selectedDays={selectedDays}
+          />
         </ThemedView>
-        <ThemedView style={styles.stepContainer}>
-          <ThemedText type="subtitle">Intervalo Padrão</ThemedText>
+
+        <ThemedView
+          style={[
+            styles.stepContainer,
+            isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
+          ]}
+        >
+          <ThemedText
+            type="subtitle"
+            style={isDarkMode ? styles.darkText : styles.lightText}
+          >
+            Intervalo Padrão
+          </ThemedText>
           <TouchableOpacity
             style={buttonStyle(!!intervalTime)}
             onPress={() => setShowPicker("intervalTime")}
@@ -111,7 +210,7 @@ export default function RegistroScreen() {
           </TouchableOpacity>
           {showPicker === "intervalTime" && (
             <RNDateTimePicker
-              display="inline"
+              display="default"
               mode="time"
               value={intervalTime || new Date()}
               onChange={onChange}
@@ -119,7 +218,15 @@ export default function RegistroScreen() {
             />
           )}
         </ThemedView>
-        <TouchableOpacity style={styles.confirmButton}>
+
+        <TouchableOpacity
+          style={[
+            styles.confirmButton,
+            isConfirmButtonDisabled && styles.disabledButton,
+          ]}
+          onPress={handleConfirm}
+          disabled={isConfirmButtonDisabled}
+        >
           <ThemedText type="subtitle" style={styles.confirmButtonText}>
             Confirmar
           </ThemedText>
@@ -127,53 +234,47 @@ export default function RegistroScreen() {
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  darkBackground: {
-    backgroundColor: "#f3efef",
-  },
-  lightBackground: {
-    backgroundColor: "#f3efef",
-  },
+  container: { flex: 1 },
+  content: { flex: 1, padding: 16 },
+  darkBackground: { backgroundColor: "#010409" },
+  lightBackground: { backgroundColor: "#F6F8FA" },
   titleContainer: {
-    backgroundColor: "#f3efef",
+    backgroundColor: "transparent",
     alignItems: "center",
     marginVertical: 16,
   },
   stepContainer: {
-    height: "18%",
     padding: 16,
     marginBottom: 16,
     borderRadius: 12,
-    backgroundColor: "#24B7B8",
-  },
-  confirmButtonHour: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: "#ffffff",
-    alignItems: "center",
-    marginTop: 8,
-    width: "100%",
-  },
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  } as ViewStyle,
   confirmButton: {
-    backgroundColor: "#000707",
+    backgroundColor: "#1C8139",
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: "center",
     width: "100%",
-  },
+  } as ViewStyle,
   confirmButtonText: {
-    color: "#ffffff",
+    color: "#FFFFFF",
     fontSize: 16,
-  },
+  } as TextStyle,
+  disabledButton: {
+    backgroundColor: "#95D8A6",
+  } as ViewStyle,
+  lightText: { color: "#070707" },
+  darkText: { color: "#FFFFFF" },
+  lightStepContainer: { backgroundColor: "#FFFFFF" },
+  darkStepContainer: { backgroundColor: "#161B22" },
 });
+
+export default RegistroScreen;
