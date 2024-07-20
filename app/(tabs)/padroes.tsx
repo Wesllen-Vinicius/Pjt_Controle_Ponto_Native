@@ -18,7 +18,7 @@ import CalendarDayOfWeek from "@/components/DayOfWeek";
 import Header from "@/components/Header";
 import { useDarkMode } from "@/context/DarkModeContext";
 
-export default function RegistroScreen() {
+const RegistroScreen = () => {
   const [showPicker, setShowPicker] = useState<
     "defaultTime" | "intervalTime" | null
   >(null);
@@ -42,12 +42,15 @@ export default function RegistroScreen() {
     }
 
     const currentDate = selectedDate || new Date();
+    console.log("Selected date:", currentDate);
+
     if (showPicker === "defaultTime") {
       setDefaultTime(currentDate);
     } else if (showPicker === "intervalTime") {
       setIntervalTime(currentDate);
     }
-    if (Platform.OS === "ios") setShowPicker(null);
+
+    setShowPicker(null);
   };
 
   const formatTime = (date: Date | null) => {
@@ -160,7 +163,7 @@ export default function RegistroScreen() {
           </TouchableOpacity>
           {showPicker === "defaultTime" && (
             <RNDateTimePicker
-              display="inline"
+              display="default" // Ajuste aqui se necessário
               mode="time"
               value={defaultTime || new Date()}
               onChange={onChange}
@@ -208,7 +211,7 @@ export default function RegistroScreen() {
           </TouchableOpacity>
           {showPicker === "intervalTime" && (
             <RNDateTimePicker
-              display="inline"
+              display="default" // Ajuste aqui se necessário
               mode="time"
               value={intervalTime || new Date()}
               onChange={onChange}
@@ -232,7 +235,7 @@ export default function RegistroScreen() {
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -245,7 +248,6 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   stepContainer: {
-    height: "24%",
     padding: 16,
     marginBottom: 16,
     borderRadius: 12,
@@ -275,3 +277,5 @@ const styles = StyleSheet.create({
   lightStepContainer: { backgroundColor: "#FFFFFF" },
   darkStepContainer: { backgroundColor: "#161B22" },
 });
+
+export default RegistroScreen;
