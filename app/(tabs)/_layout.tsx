@@ -1,20 +1,20 @@
-import { Tabs } from "expo-router";
 import React from "react";
+import { Tabs } from "expo-router";
 import "react-native-gesture-handler";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useDarkMode } from "@/context/DarkModeContext";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { isDarkMode } = useDarkMode();
 
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: "#ffffff",
+          backgroundColor: isDarkMode ? "#161B22" : "#ffffff",
         },
-        tabBarActiveTintColor: "#24B7B8",
-        tabBarInactiveTintColor: "#5c5b5b",
+        tabBarActiveTintColor: isDarkMode ? "#ffffff" : "#24B7B8",
+        tabBarInactiveTintColor: isDarkMode ? "#ffffff" : "#5c5b5b",
         headerShown: false,
       }}
     >

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const CalendarDayOfWeek: React.FC = () => {
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
-
+const CalendarDayOfWeek: React.FC<{
+  onDayChange: (day: string) => void;
+  selectedDays: string[];
+}> = ({ onDayChange, selectedDays }) => {
   const daysOfWeek: string[] = [
     "Dom",
     "Seg",
@@ -15,11 +16,7 @@ const CalendarDayOfWeek: React.FC = () => {
   ];
 
   const toggleDay = (day: string) => {
-    setSelectedDays((prevSelectedDays) =>
-      prevSelectedDays.includes(day)
-        ? prevSelectedDays.filter((d) => d !== day)
-        : [...prevSelectedDays, day]
-    );
+    onDayChange(day);
   };
 
   return (
@@ -32,6 +29,7 @@ const CalendarDayOfWeek: React.FC = () => {
             selectedDays.includes(day) && styles.selectedDayButton,
           ]}
           onPress={() => toggleDay(day)}
+          accessibilityLabel={`Selecionar ${day}`}
         >
           <Text
             style={[
@@ -49,20 +47,23 @@ const CalendarDayOfWeek: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     flexDirection: "row",
-    padding: 2,
+    justifyContent: "space-around",
+    padding: 10,
   },
   dayButton: {
-    backgroundColor: "#ffffff",
-    padding: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    backgroundColor: "#F6F8FA",
+    padding: 6,
     margin: 5,
     borderRadius: 5,
   },
   selectedDayButton: {
-    backgroundColor: "#000000",
+    backgroundColor: "#161B22",
   },
   dayButtonText: {
     fontSize: 16,
