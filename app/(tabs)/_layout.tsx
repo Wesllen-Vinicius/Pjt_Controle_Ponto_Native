@@ -13,7 +13,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: isDarkMode ? "#161B22" : "#ffffff",
         },
-        tabBarActiveTintColor: isDarkMode ? "#ffffff" : "#24B7B8",
+        tabBarActiveTintColor: isDarkMode ? "#ffffff" : "#161B22",
         tabBarInactiveTintColor: isDarkMode ? "#ffffff" : "#5c5b5b",
         headerShown: false,
       }}

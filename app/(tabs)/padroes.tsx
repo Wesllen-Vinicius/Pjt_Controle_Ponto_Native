@@ -4,7 +4,6 @@ import {
   StatusBar,
   StyleSheet,
   TouchableOpacity,
-  Platform,
   View,
   TextStyle,
   ViewStyle,
@@ -130,16 +129,16 @@ const RegistroScreen = () => {
       ]}
     >
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
-      <Header appName="Controle de Ponto" />
+      <Header appName="Padrões de Ponto" />
       <View style={styles.content}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText
+        {/* <ThemedView style={styles.titleContainer}>
+          {/* <ThemedText
             type="title"
             style={isDarkMode ? styles.darkText : styles.lightText}
           >
             Padrões
-          </ThemedText>
-        </ThemedView>
+          </ThemedText> */}
+        {/* </ThemedView> */}
 
         <ThemedView
           style={[

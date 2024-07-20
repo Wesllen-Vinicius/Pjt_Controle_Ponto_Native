@@ -22,7 +22,6 @@ const Header: React.FC<HeaderProps> = ({ appName }) => {
   const [iconColor, setIconColor] = useState<string>("#000000");
 
   useEffect(() => {
-    // Animação da cor do ícone
     Animated.timing(themeAnimation, {
       toValue: isDarkMode ? 1 : 0,
       duration: transitionDuration,
