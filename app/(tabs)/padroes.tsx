@@ -163,7 +163,7 @@ const RegistroScreen = () => {
           </TouchableOpacity>
           {showPicker === "defaultTime" && (
             <RNDateTimePicker
-              display="default" // Ajuste aqui se necessário
+              display="default"
               mode="time"
               value={defaultTime || new Date()}
               onChange={onChange}
@@ -211,7 +211,7 @@ const RegistroScreen = () => {
           </TouchableOpacity>
           {showPicker === "intervalTime" && (
             <RNDateTimePicker
-              display="default" // Ajuste aqui se necessário
+              display="default"
               mode="time"
               value={intervalTime || new Date()}
               onChange={onChange}
