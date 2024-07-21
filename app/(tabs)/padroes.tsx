@@ -16,6 +16,8 @@ import { ThemedView } from "@/components/ThemedView";
 import CalendarDayOfWeek from "@/components/DayOfWeek";
 import Header from "@/components/Header";
 import { useDarkMode } from "@/context/DarkModeContext";
+import { useConfigTable } from "@/database/useConfigTable";
+import ShowConfigPadroes from "@/components/ShowConfigPadroes";
 
 const RegistroScreen = () => {
   const [showPicker, setShowPicker] = useState<
@@ -31,8 +33,10 @@ const RegistroScreen = () => {
   const [confirmedIntervalTime, setConfirmedIntervalTime] =
     useState<Date | null>(null);
   const [confirmedDays, setConfirmedDays] = useState<string[]>([]);
+  const [existingRecordId, setExistingRecordId] = useState<number | null>(null);
 
   const { isDarkMode } = useDarkMode();
+  const { create, show, update } = useConfigTable();
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (event.type === "dismissed") {
@@ -71,8 +75,17 @@ const RegistroScreen = () => {
     const hasChanges = () => {
       const isDefaultTimeChanged = defaultTime !== confirmedDefaultTime;
       const isIntervalTimeChanged = intervalTime !== confirmedIntervalTime;
+
+      const sortedSelectedDays = Array.isArray(selectedDays)
+        ? selectedDays.sort()
+        : [];
+      const sortedConfirmedDays = Array.isArray(confirmedDays)
+        ? confirmedDays.sort()
+        : [];
+
       const areDaysChanged =
-        selectedDays.sort().toString() !== confirmedDays.sort().toString();
+        sortedSelectedDays.toString() !== sortedConfirmedDays.toString();
+
       return isDefaultTimeChanged || isIntervalTimeChanged || areDaysChanged;
     };
 
@@ -86,13 +99,31 @@ const RegistroScreen = () => {
     confirmedDays,
   ]);
 
-  const handleConfirm = () => {
-    setConfirmedDefaultTime(defaultTime);
-    setConfirmedIntervalTime(intervalTime);
-    setConfirmedDays(selectedDays);
-    setIsConfirmButtonDisabled(true);
-    // Lógica para salvar os dados no banco de dados...
-  };
+  useEffect(() => {
+    const fetchExistingRecord = async () => {
+      try {
+        const id = 1;
+        const record = await show(id);
+        if (record) {
+          setExistingRecordId(record.id);
+          setDefaultTime(record.horapadrao);
+          setIntervalTime(record.intervalopadrao);
+          setSelectedDays(
+            Array.isArray(record.diasdasemana) ? record.diasdasemana : []
+          );
+          setConfirmedDefaultTime(record.horapadrao);
+          setConfirmedIntervalTime(record.intervalopadrao);
+          setConfirmedDays(
+            Array.isArray(record.diasdasemana) ? record.diasdasemana : []
+          );
+        }
+      } catch (error) {
+        console.error("Erro ao buscar registro existente:", error);
+      }
+    };
+
+    fetchExistingRecord();
+  }, []);
 
   const buttonStyle = (isSelected: boolean): ViewStyle => ({
     backgroundColor: isSelected
@@ -121,122 +152,163 @@ const RegistroScreen = () => {
     fontSize: 16,
   });
 
+  const handleConfirm = async () => {
+    try {
+      if (existingRecordId) {
+        await update({
+          id: existingRecordId,
+          horapadrao: defaultTime || new Date(),
+          intervalopadrao: intervalTime || new Date(),
+          diasdasemana: selectedDays,
+        });
+        console.log("Registro atualizado com sucesso!");
+      } else {
+        const { insertedRowId } = await create({
+          horapadrao: defaultTime || new Date(),
+          intervalopadrao: intervalTime || new Date(),
+          diasdasemana: selectedDays,
+        });
+        setExistingRecordId(insertedRowId);
+        console.log("Registro criado com sucesso!");
+      }
+      setConfirmedDefaultTime(defaultTime || new Date());
+      setConfirmedIntervalTime(intervalTime || new Date());
+      setConfirmedDays(selectedDays);
+      setIsConfirmButtonDisabled(true);
+    } catch (error) {
+      console.error("Erro ao criar ou atualizar registro:", error);
+    }
+  };
+
   return (
-    <SafeAreaView
-      style={[
-        styles.container,
-        isDarkMode ? styles.darkBackground : styles.lightBackground,
-      ]}
-    >
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
-      <Header appName="Padrões de Ponto" />
-      <View style={styles.content}>
-        {/* <ThemedView style={styles.titleContainer}>
-          {/* <ThemedText
-            type="title"
-            style={isDarkMode ? styles.darkText : styles.lightText}
+    <>
+      <SafeAreaView
+        style={[
+          styles.container,
+          isDarkMode ? styles.darkBackground : styles.lightBackground,
+        ]}
+      >
+        <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
+        <Header appName="Padrões de Ponto" />
+        <View style={styles.content}>
+          <ThemedView
+            style={[
+              styles.stepContainer,
+              isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
+            ]}
           >
-            Padrões
-          </ThemedText> */}
-        {/* </ThemedView> */}
+            <ThemedText
+              type="subtitle"
+              style={isDarkMode ? styles.darkText : styles.lightText}
+            >
+              Hora Padrão
+            </ThemedText>
+            <TouchableOpacity
+              style={buttonStyle(!!defaultTime)}
+              onPress={() => setShowPicker("defaultTime")}
+            >
+              <ThemedText
+                type="subtitle"
+                style={buttonTextStyle(!!defaultTime)}
+              >
+                {formatTime(defaultTime)}
+              </ThemedText>
+            </TouchableOpacity>
+            {showPicker === "defaultTime" && (
+              <RNDateTimePicker
+                display="default"
+                mode="time"
+                value={defaultTime || new Date()}
+                onChange={onChange}
+              />
+            )}
+          </ThemedView>
 
-        <ThemedView
-          style={[
-            styles.stepContainer,
-            isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
-          ]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={isDarkMode ? styles.darkText : styles.lightText}
+          <ThemedView
+            style={[
+              styles.stepContainer,
+              isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
+            ]}
           >
-            Hora Padrão
-          </ThemedText>
+            <ThemedText
+              type="subtitle"
+              style={isDarkMode ? styles.darkText : styles.lightText}
+            >
+              Dias da Semana
+            </ThemedText>
+            <CalendarDayOfWeek
+              onDayChange={handleDaySelection}
+              selectedDays={selectedDays}
+            />
+          </ThemedView>
+
+          <ThemedView
+            style={[
+              styles.stepContainer,
+              isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
+            ]}
+          >
+            <ThemedText
+              type="subtitle"
+              style={isDarkMode ? styles.darkText : styles.lightText}
+            >
+              Intervalo Padrão
+            </ThemedText>
+            <TouchableOpacity
+              style={buttonStyle(!!intervalTime)}
+              onPress={() => setShowPicker("intervalTime")}
+            >
+              <ThemedText
+                type="subtitle"
+                style={buttonTextStyle(!!intervalTime)}
+              >
+                {formatTime(intervalTime)}
+              </ThemedText>
+            </TouchableOpacity>
+            {showPicker === "intervalTime" && (
+              <RNDateTimePicker
+                display="default"
+                mode="time"
+                value={intervalTime || new Date()}
+                onChange={onChange}
+                locale="pt-BR"
+              />
+            )}
+          </ThemedView>
+
           <TouchableOpacity
-            style={buttonStyle(!!defaultTime)}
-            onPress={() => setShowPicker("defaultTime")}
+            style={[
+              styles.confirmButton,
+              isConfirmButtonDisabled && styles.disabledButton,
+            ]}
+            onPress={handleConfirm}
+            disabled={isConfirmButtonDisabled}
           >
-            <ThemedText type="subtitle" style={buttonTextStyle(!!defaultTime)}>
-              {formatTime(defaultTime)}
+            <ThemedText type="subtitle" style={styles.confirmButtonText}>
+              Confirmar
             </ThemedText>
           </TouchableOpacity>
-          {showPicker === "defaultTime" && (
-            <RNDateTimePicker
-              display="default"
-              mode="time"
-              value={defaultTime || new Date()}
-              onChange={onChange}
-            />
-          )}
-        </ThemedView>
-
-        <ThemedView
-          style={[
-            styles.stepContainer,
-            isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
-          ]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={isDarkMode ? styles.darkText : styles.lightText}
-          >
-            Dias da Semana
-          </ThemedText>
-          <CalendarDayOfWeek
-            onDayChange={handleDaySelection}
-            selectedDays={selectedDays}
-          />
-        </ThemedView>
-
-        <ThemedView
-          style={[
-            styles.stepContainer,
-            isDarkMode ? styles.darkStepContainer : styles.lightStepContainer,
-          ]}
-        >
-          <ThemedText
-            type="subtitle"
-            style={isDarkMode ? styles.darkText : styles.lightText}
-          >
-            Intervalo Padrão
-          </ThemedText>
-          <TouchableOpacity
-            style={buttonStyle(!!intervalTime)}
-            onPress={() => setShowPicker("intervalTime")}
-          >
-            <ThemedText type="subtitle" style={buttonTextStyle(!!intervalTime)}>
-              {formatTime(intervalTime)}
-            </ThemedText>
-          </TouchableOpacity>
-          {showPicker === "intervalTime" && (
-            <RNDateTimePicker
-              display="default"
-              mode="time"
-              value={intervalTime || new Date()}
-              onChange={onChange}
-              locale="pt-BR"
-            />
-          )}
-        </ThemedView>
-
-        <TouchableOpacity
-          style={[
-            styles.confirmButton,
-            isConfirmButtonDisabled && styles.disabledButton,
-          ]}
-          onPress={handleConfirm}
-          disabled={isConfirmButtonDisabled}
-        >
-          <ThemedText type="subtitle" style={styles.confirmButtonText}>
-            Confirmar
-          </ThemedText>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          <ShowConfigPadroes />
+        </View>
+      </SafeAreaView>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  recordsContainer: {
+    marginTop: 16,
+    padding: 16,
+  },
+  recordContainer: {
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    backgroundColor: "#f0f0f0",
+  },
+  recordText: {
+    fontSize: 14,
+  },
   container: { flex: 1 },
   content: { flex: 1, padding: 16 },
   darkBackground: { backgroundColor: "#010409" },
