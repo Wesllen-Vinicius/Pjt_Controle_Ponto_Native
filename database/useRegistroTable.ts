@@ -6,6 +6,11 @@ export type Registro = {
     data: Date;
 };
 
+interface DatabaseRegistro {
+    id: number;
+    data: string;
+}
+
 export function useRegistroTable() {
     const database = useSQLiteContext();
     const [notifyChange, setNotifyChange] = useState<() => void>(
@@ -38,16 +43,24 @@ export function useRegistroTable() {
         }
     }
 
-    async function show() {
+    async function show(): Promise<Registro[]> {
         try {
             const query = 'SELECT * FROM registro';
-            const response = await database.getAllAsync<any[]>(query); // Usando getAllAsync para obter todos os registros
+            const response = (await database.getAllAsync(
+                query
+            )) as unknown as DatabaseRegistro[];
 
-            if (response && response.length > 0) {
-                return response.map((record) => ({
-                    id: record.id,
-                    data: new Date(record.data),
-                }));
+            if (Array.isArray(response) && response.length > 0) {
+                return response.map((record) => {
+                    if ('id' in record && 'data' in record) {
+                        return {
+                            id: record.id,
+                            data: new Date(record.data),
+                        } as Registro;
+                    } else {
+                        throw new Error('Registro com formato inválido.');
+                    }
+                });
             }
 
             return [];

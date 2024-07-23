@@ -15,7 +15,6 @@ import RNDateTimePicker, {
 import Header from '@/components/Header';
 import { useDarkMode } from '@/context/DarkModeContext';
 import { ThemedView } from '@/components/ThemedView';
-import TimelineVertical from '@/components/TimelineVertical';
 import { useRegistroTable } from '@/database/useRegistroTable';
 
 export default function TabTwoScreen() {
