@@ -1,50 +1,108 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Controle de Ponto
 
-## Get started
+Controle de Ponto é uma aplicação para registro de horas trabalhadas e cálculo de banco de horas. O objetivo é proporcionar um controle pessoal das horas trabalhadas de forma simples e eficiente.
 
-1. Install dependencies
+## Funcionalidades
 
-   ```bash
+- Registro de pontos
+- Cálculo do banco de horas
+
+## Tecnologias Utilizadas
+
+- **React Native**: Framework principal para desenvolvimento mobile.
+- **Expo**: Ferramenta para simplificar o desenvolvimento de aplicações React Native.
+- **SQLite**: Banco de dados utilizado para armazenar os registros de pontos.
+- **React Navigation**: Navegação entre telas.
+- **DateTimePicker**: Seleção de datas e horas.
+
+## Pré-requisitos
+
+- Node.js
+- Expo CLI
+
+## Instalação
+
+1. Clone o repositório:
+   ```sh
+   git clone <URL do Repositório>
+   cd controle-ponto
+   ```
+
+2. Instale as dependências:
+   ```sh
    npm install
    ```
 
-2. Start the app
-
-   ```bash
-    npx expo start
+3. Inicie o projeto:
+   ```sh
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+## Executando o Projeto
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Android
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm run android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### iOS
 
-## Learn more
+```sh
+npm run ios
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### Web
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```sh
+npm run web
+```
 
-## Join the community
+### Testes
 
-Join our community of developers creating universal apps.
+Para executar os testes, utilize o comando:
+```sh
+npm test
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Lint
+
+Para verificar a formatação do código:
+```sh
+npm run lint
+```
+
+## Estrutura do Projeto
+
+```sh
+.
+├── App.js
+├── assets
+│   └── ...
+├── components
+│   └── ...
+├── screens
+│   └── ...
+├── navigation
+│   └── ...
+├── utils
+│   └── ...
+└── package.json
+```
+
+## Contribuindo
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nome-da-feature`)
+3. Commit suas alterações (`git commit -am 'Adiciona nova feature'`)
+4. Faça o push para a branch (`git push origin feature/nome-da-feature`)
+5. Abra um Pull Request
+
+## Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE.md para mais detalhes.
+
+---
+
+Desenvolvido com ❤️ por [Seu Nome](https://github.com/seu-usuario).
