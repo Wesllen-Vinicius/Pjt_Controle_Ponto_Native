@@ -37,13 +37,6 @@ export default function TabTwoScreen() {
     };
 
     const saveDate = async (selectedDate: Date) => {
-        if (records.length >= 4) {
-            console.log(
-                'O número máximo de registros de ponto já foi atingido.'
-            );
-            return;
-        }
-
         try {
             await create({ data: selectedDate });
             console.log('Registro criado com sucesso!');
@@ -70,13 +63,6 @@ export default function TabTwoScreen() {
     }, []);
 
     const handlePress = () => {
-        if (records.length >= 4) {
-            console.log(
-                'O número máximo de registros de ponto já foi atingido.'
-            );
-            return;
-        }
-
         const currentDate = new Date();
         setDate(currentDate);
         setShowPicker('defaultTime');
