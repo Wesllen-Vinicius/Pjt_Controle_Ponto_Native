@@ -5,12 +5,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
-    TextStyle,
-    ViewStyle,
 } from 'react-native';
-import RNDateTimePicker, {
-    DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import CalendarDayOfWeek from '@/components/DayOfWeek';
@@ -18,6 +13,10 @@ import Header from '@/components/Header';
 import { useDarkMode } from '@/context/DarkModeContext';
 import { useConfigTable } from '@/database/useConfigTable';
 import ShowConfigPadroes from '@/components/ShowConfigPadroes';
+import DateTimePicker from '@/components/DateTimePicker';
+
+import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import TimePickerButton from '@/components/TimePickerButton';
 
 const RegistroScreen = () => {
     const [showPicker, setShowPicker] = useState<
@@ -40,61 +39,11 @@ const RegistroScreen = () => {
     const { isDarkMode } = useDarkMode();
     const { create, show, update } = useConfigTable();
 
-    const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-        if (event.type === 'dismissed') {
-            setShowPicker(null);
-            return;
-        }
-
-        const currentDate = selectedDate || new Date();
-        console.log('Selected date:', currentDate);
-
-        if (showPicker === 'defaultTime') {
-            setDefaultTime(currentDate);
-        } else if (showPicker === 'intervalTime') {
-            setIntervalTime(currentDate);
-        }
-
-        setShowPicker(null);
-    };
-
-    const formatTime = (date: Date | null) => {
-        if (!date) return '00:00';
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
-    };
-
-    const handleDaySelection = (day: string) => {
-        setSelectedDays((prevSelectedDays) =>
-            prevSelectedDays.includes(day)
-                ? prevSelectedDays.filter((d) => d !== day)
-                : [...prevSelectedDays, day]
-        );
-    };
+    useEffect(() => {
+        fetchExistingRecord();
+    }, []);
 
     useEffect(() => {
-        const hasChanges = () => {
-            const isDefaultTimeChanged = defaultTime !== confirmedDefaultTime;
-            const isIntervalTimeChanged =
-                intervalTime !== confirmedIntervalTime;
-
-            const sortedSelectedDays = Array.isArray(selectedDays)
-                ? selectedDays.sort()
-                : [];
-            const sortedConfirmedDays = Array.isArray(confirmedDays)
-                ? confirmedDays.sort()
-                : [];
-
-            const areDaysChanged =
-                sortedSelectedDays.toString() !==
-                sortedConfirmedDays.toString();
-
-            return (
-                isDefaultTimeChanged || isIntervalTimeChanged || areDaysChanged
-            );
-        };
-
         setIsConfirmButtonDisabled(!hasChanges());
     }, [
         defaultTime,
@@ -105,246 +54,212 @@ const RegistroScreen = () => {
         confirmedDays,
     ]);
 
-    useEffect(() => {
-        const fetchExistingRecord = async () => {
-            try {
-                const id = 1;
-                const record = await show(id);
-                if (record) {
-                    setExistingRecordId(record.id);
-                    setDefaultTime(record.horapadrao);
-                    setIntervalTime(record.intervalopadrao);
-                    setSelectedDays(
-                        Array.isArray(record.diasdasemana)
-                            ? record.diasdasemana
-                            : []
-                    );
-                    setConfirmedDefaultTime(record.horapadrao);
-                    setConfirmedIntervalTime(record.intervalopadrao);
-                    setConfirmedDays(
-                        Array.isArray(record.diasdasemana)
-                            ? record.diasdasemana
-                            : []
-                    );
-                }
-            } catch (error) {
-                console.error('Erro ao buscar registro existente:', error);
+    const fetchExistingRecord = async () => {
+        try {
+            const id = 1;
+            const record = await show(id);
+            if (record) {
+                setExistingRecordData(record);
             }
-        };
+        } catch (error) {
+            console.error('Erro ao buscar registro existente:', error);
+        }
+    };
 
-        fetchExistingRecord();
-    }, []);
+    const setExistingRecordData = (record: any) => {
+        setExistingRecordId(record.id);
+        setDefaultTime(record.horapadrao);
+        setIntervalTime(record.intervalopadrao);
+        setSelectedDays(record.diasdasemana || []);
+        setConfirmedDefaultTime(record.horapadrao);
+        setConfirmedIntervalTime(record.intervalopadrao);
+        setConfirmedDays(record.diasdasemana || []);
+    };
 
-    const buttonStyle = (isSelected: boolean): ViewStyle => ({
-        backgroundColor: isSelected
-            ? isDarkMode
-                ? '#FFFFFF'
-                : '#161B22'
-            : isDarkMode
-            ? '#010409'
-            : '#bdb9b9',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 8,
-        width: '100%',
-    });
+    const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+        if (event.type === 'dismissed') {
+            setShowPicker(null);
+            return;
+        }
 
-    const buttonTextStyle = (isSelected: boolean): TextStyle => ({
-        color: isSelected
-            ? isDarkMode
-                ? '#000000'
-                : '#FFFFFF'
-            : isDarkMode
-            ? '#FFFFFF'
-            : '#161B22',
-        fontSize: 16,
-    });
+        const currentDate = selectedDate || new Date();
+        if (showPicker === 'defaultTime') {
+            setDefaultTime(currentDate);
+        } else if (showPicker === 'intervalTime') {
+            setIntervalTime(currentDate);
+        }
+
+        setShowPicker(null);
+    };
+
+    const hasChanges = () => {
+        const isDefaultTimeChanged = defaultTime !== confirmedDefaultTime;
+        const isIntervalTimeChanged = intervalTime !== confirmedIntervalTime;
+
+        const sortedSelectedDays = selectedDays.sort();
+        const sortedConfirmedDays = confirmedDays.sort();
+
+        const areDaysChanged =
+            sortedSelectedDays.toString() !== sortedConfirmedDays.toString();
+
+        return isDefaultTimeChanged || isIntervalTimeChanged || areDaysChanged;
+    };
+
+    const handleDaySelection = (day: string) => {
+        setSelectedDays((prevSelectedDays) =>
+            prevSelectedDays.includes(day)
+                ? prevSelectedDays.filter((d) => d !== day)
+                : [...prevSelectedDays, day]
+        );
+    };
 
     const handleConfirm = async () => {
         try {
-            if (existingRecordId) {
-                await update({
-                    id: existingRecordId,
-                    horapadrao: defaultTime || new Date(),
-                    intervalopadrao: intervalTime || new Date(),
-                    diasdasemana: selectedDays,
-                });
-                console.log('Registro atualizado com sucesso!');
+            if (existingRecordId !== null) {
+                await updateRecord(existingRecordId);
             } else {
-                const { insertedRowId } = await create({
-                    horapadrao: defaultTime || new Date(),
-                    intervalopadrao: intervalTime || new Date(),
-                    diasdasemana: selectedDays,
-                });
-                setExistingRecordId(insertedRowId);
-                console.log('Registro criado com sucesso!');
+                await createRecord();
             }
-            setConfirmedDefaultTime(defaultTime || new Date());
-            setConfirmedIntervalTime(intervalTime || new Date());
-            setConfirmedDays(selectedDays);
+            setConfirmedState();
             setIsConfirmButtonDisabled(true);
         } catch (error) {
             console.error('Erro ao criar ou atualizar registro:', error);
         }
     };
 
+    const updateRecord = async (id: number) => {
+        await update({
+            id: id,
+            horapadrao: defaultTime || new Date(),
+            intervalopadrao: intervalTime || new Date(),
+            diasdasemana: selectedDays,
+        });
+        console.log('Registro atualizado com sucesso!');
+    };
+
+    const createRecord = async () => {
+        const { insertedRowId } = await create({
+            horapadrao: defaultTime || new Date(),
+            intervalopadrao: intervalTime || new Date(),
+            diasdasemana: selectedDays,
+        });
+        setExistingRecordId(insertedRowId);
+        console.log('Registro criado com sucesso!');
+    };
+
+    const setConfirmedState = () => {
+        setConfirmedDefaultTime(defaultTime || new Date());
+        setConfirmedIntervalTime(intervalTime || new Date());
+        setConfirmedDays(selectedDays);
+    };
+
     return (
-        <>
-            <SafeAreaView
-                style={[
-                    styles.container,
-                    isDarkMode ? styles.darkBackground : styles.lightBackground,
-                ]}
-            >
-                <StatusBar
-                    barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-                />
-                <Header appName="Padrões de Ponto" />
-                <View style={styles.content}>
-                    <ThemedView
-                        style={[
-                            styles.stepContainer,
-                            isDarkMode
-                                ? styles.darkStepContainer
-                                : styles.lightStepContainer,
-                        ]}
+        <SafeAreaView
+            style={[
+                styles.container,
+                isDarkMode ? styles.darkBackground : styles.lightBackground,
+            ]}
+        >
+            <StatusBar
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            />
+            <Header appName="Padrões de Ponto" />
+            <View style={styles.content}>
+                <ThemedView
+                    style={[
+                        styles.stepContainer,
+                        isDarkMode
+                            ? styles.darkStepContainer
+                            : styles.lightStepContainer,
+                    ]}
+                >
+                    <ThemedText
+                        type="subtitle"
+                        style={isDarkMode ? styles.darkText : styles.lightText}
                     >
-                        <ThemedText
-                            type="subtitle"
-                            style={
-                                isDarkMode ? styles.darkText : styles.lightText
-                            }
-                        >
-                            Hora Padrão
-                        </ThemedText>
-                        <TouchableOpacity
-                            style={buttonStyle(!!defaultTime)}
-                            onPress={() => setShowPicker('defaultTime')}
-                        >
-                            <ThemedText
-                                type="subtitle"
-                                style={buttonTextStyle(!!defaultTime)}
-                            >
-                                {formatTime(defaultTime)}
-                            </ThemedText>
-                        </TouchableOpacity>
-                        {showPicker === 'defaultTime' && (
-                            <RNDateTimePicker
-                                display="default"
-                                mode="time"
-                                value={defaultTime || new Date()}
-                                onChange={onChange}
-                            />
-                        )}
-                    </ThemedView>
+                        Hora Padrão
+                    </ThemedText>
+                    <TimePickerButton
+                        label="Hora Padrão"
+                        time={defaultTime}
+                        isDarkMode={isDarkMode}
+                        onPress={() => setShowPicker('defaultTime')}
+                    />
+                </ThemedView>
 
-                    <ThemedView
-                        style={[
-                            styles.stepContainer,
-                            isDarkMode
-                                ? styles.darkStepContainer
-                                : styles.lightStepContainer,
-                        ]}
+                <ThemedView
+                    style={[
+                        styles.stepContainer,
+                        isDarkMode
+                            ? styles.darkStepContainer
+                            : styles.lightStepContainer,
+                    ]}
+                >
+                    <ThemedText
+                        type="subtitle"
+                        style={isDarkMode ? styles.darkText : styles.lightText}
                     >
-                        <ThemedText
-                            type="subtitle"
-                            style={
-                                isDarkMode ? styles.darkText : styles.lightText
-                            }
-                        >
-                            Dias da Semana
-                        </ThemedText>
-                        <CalendarDayOfWeek
-                            onDayChange={handleDaySelection}
-                            selectedDays={selectedDays}
-                        />
-                    </ThemedView>
+                        Dias da Semana
+                    </ThemedText>
+                    <CalendarDayOfWeek
+                        onDayChange={handleDaySelection}
+                        selectedDays={selectedDays}
+                    />
+                </ThemedView>
 
-                    <ThemedView
-                        style={[
-                            styles.stepContainer,
-                            isDarkMode
-                                ? styles.darkStepContainer
-                                : styles.lightStepContainer,
-                        ]}
+                <ThemedView
+                    style={[
+                        styles.stepContainer,
+                        isDarkMode
+                            ? styles.darkStepContainer
+                            : styles.lightStepContainer,
+                    ]}
+                >
+                    <ThemedText
+                        type="subtitle"
+                        style={isDarkMode ? styles.darkText : styles.lightText}
                     >
-                        <ThemedText
-                            type="subtitle"
-                            style={
-                                isDarkMode ? styles.darkText : styles.lightText
-                            }
-                        >
-                            Intervalo Padrão
-                        </ThemedText>
-                        <TouchableOpacity
-                            style={buttonStyle(!!intervalTime)}
-                            onPress={() => setShowPicker('intervalTime')}
-                        >
-                            <ThemedText
-                                type="subtitle"
-                                style={buttonTextStyle(!!intervalTime)}
-                            >
-                                {formatTime(intervalTime)}
-                            </ThemedText>
-                        </TouchableOpacity>
-                        {showPicker === 'intervalTime' && (
-                            <RNDateTimePicker
-                                display="default"
-                                mode="time"
-                                value={intervalTime || new Date()}
-                                onChange={onChange}
-                                locale="pt-BR"
-                            />
-                        )}
-                    </ThemedView>
+                        Intervalo Padrão
+                    </ThemedText>
+                    <TimePickerButton
+                        label="Intervalo Padrão"
+                        time={intervalTime}
+                        isDarkMode={isDarkMode}
+                        onPress={() => setShowPicker('intervalTime')}
+                    />
+                </ThemedView>
 
-                    <TouchableOpacity
-                        style={[
-                            styles.confirmButton,
-                            isConfirmButtonDisabled && styles.disabledButton,
-                        ]}
-                        onPress={handleConfirm}
-                        disabled={isConfirmButtonDisabled}
+                <TouchableOpacity
+                    style={[
+                        styles.confirmButton,
+                        isConfirmButtonDisabled && styles.disabledButton,
+                    ]}
+                    onPress={handleConfirm}
+                    disabled={isConfirmButtonDisabled}
+                >
+                    <ThemedText
+                        type="subtitle"
+                        style={styles.confirmButtonText}
                     >
-                        <ThemedText
-                            type="subtitle"
-                            style={styles.confirmButtonText}
-                        >
-                            Confirmar
-                        </ThemedText>
-                    </TouchableOpacity>
-                    <ShowConfigPadroes />
-                </View>
-            </SafeAreaView>
-        </>
+                        Confirmar
+                    </ThemedText>
+                </TouchableOpacity>
+                <ShowConfigPadroes />
+            </View>
+            <DateTimePicker
+                showPicker={showPicker}
+                date={defaultTime || new Date()}
+                onChange={onChange}
+            />
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    recordsContainer: {
-        marginTop: 16,
-        padding: 16,
-    },
-    recordContainer: {
-        padding: 16,
-        borderRadius: 8,
-        marginBottom: 8,
-        backgroundColor: '#f0f0f0',
-    },
-    recordText: {
-        fontSize: 14,
-    },
     container: { flex: 1 },
     content: { flex: 1, padding: 16 },
     darkBackground: { backgroundColor: '#010409' },
     lightBackground: { backgroundColor: '#F6F8FA' },
-    titleContainer: {
-        backgroundColor: 'transparent',
-        alignItems: 'center',
-        marginVertical: 16,
-    },
     stepContainer: {
         padding: 16,
         marginBottom: 16,
@@ -354,7 +269,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,
-    } as ViewStyle,
+    },
     confirmButton: {
         backgroundColor: '#1C8139',
         paddingVertical: 16,
@@ -362,14 +277,14 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         alignItems: 'center',
         width: '100%',
-    } as ViewStyle,
+    },
     confirmButtonText: {
         color: '#FFFFFF',
         fontSize: 16,
-    } as TextStyle,
+    },
     disabledButton: {
         backgroundColor: '#95D8A6',
-    } as ViewStyle,
+    },
     lightText: { color: '#070707' },
     darkText: { color: '#FFFFFF' },
     lightStepContainer: { backgroundColor: '#FFFFFF' },
