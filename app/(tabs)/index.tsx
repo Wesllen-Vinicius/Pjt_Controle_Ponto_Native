@@ -6,16 +6,14 @@ import {
     SafeAreaView,
     StatusBar,
     FlatList,
-    Text,
 } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import RNDateTimePicker, {
-    DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
 import Header from '@/components/Header';
 import { useDarkMode } from '@/context/DarkModeContext';
 import { ThemedView } from '@/components/ThemedView';
 import { useRegistroTable } from '@/database/useRegistroTable';
+import DateTimePicker from '@/components/DateTimePicker';
+import RecordItem from '@/components/RecordItem';
 
 export default function TabTwoScreen() {
     const [showPicker, setShowPicker] = useState<
@@ -24,8 +22,13 @@ export default function TabTwoScreen() {
     const [date, setDate] = useState(new Date());
     const [records, setRecords] = useState<{ id: number; data: Date }[]>([]);
     const { create, show } = useRegistroTable();
+    const { isDarkMode } = useDarkMode();
 
-    const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    useEffect(() => {
+        loadRecords();
+    }, []);
+
+    const onChange = (event: any, selectedDate?: Date) => {
         if (event.type === 'dismissed') {
             setShowPicker(null);
             return;
@@ -58,35 +61,11 @@ export default function TabTwoScreen() {
         }
     };
 
-    useEffect(() => {
-        loadRecords();
-    }, []);
-
     const handlePress = () => {
         const currentDate = new Date();
         setDate(currentDate);
         setShowPicker('defaultTime');
     };
-
-    const { isDarkMode } = useDarkMode();
-
-    const renderItem = ({ item }: { item: { id: number; data: Date } }) => (
-        <View
-            style={[
-                styles.recordItem,
-                { backgroundColor: isDarkMode ? '#161B22' : '#FFFFFF' },
-            ]}
-        >
-            <Text
-                style={[
-                    styles.recordText,
-                    { color: isDarkMode ? '#FFFFFF' : '#070707' },
-                ]}
-            >
-                {item.data.toLocaleString()}
-            </Text>
-        </View>
-    );
 
     return (
         <SafeAreaView
@@ -118,7 +97,9 @@ export default function TabTwoScreen() {
 
                 <FlatList
                     data={records}
-                    renderItem={renderItem}
+                    renderItem={({ item }) => (
+                        <RecordItem item={item} isDarkMode={isDarkMode} />
+                    )}
                     keyExtractor={(item) => item.id.toString()}
                     style={styles.recordList}
                 />
@@ -130,16 +111,11 @@ export default function TabTwoScreen() {
             >
                 <ThemedText style={styles.buttonText}>+</ThemedText>
             </TouchableOpacity>
-            {showPicker && (
-                <RNDateTimePicker
-                    display="default"
-                    mode="time"
-                    value={date}
-                    onChange={onChange}
-                    locale="pt-BR"
-                    is24Hour={true}
-                />
-            )}
+            <DateTimePicker
+                showPicker={showPicker}
+                date={date}
+                onChange={onChange}
+            />
         </SafeAreaView>
     );
 }
@@ -189,18 +165,5 @@ const styles = StyleSheet.create({
     darkStepContainer: { backgroundColor: '#161B22' },
     recordList: {
         marginTop: 16,
-    },
-    recordItem: {
-        padding: 16,
-        marginVertical: 4,
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    recordText: {
-        fontSize: 16,
     },
 });

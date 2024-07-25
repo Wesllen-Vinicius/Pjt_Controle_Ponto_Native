@@ -1,43 +1,44 @@
-
 # Controle de Ponto
 
 Controle de Ponto é uma aplicação para registro de horas trabalhadas e cálculo de banco de horas. O objetivo é proporcionar um controle pessoal das horas trabalhadas de forma simples e eficiente.
 
 ## Funcionalidades
 
-- Registro de pontos
-- Cálculo do banco de horas
+-   Registro de pontos
+-   Cálculo do banco de horas
 
 ## Tecnologias Utilizadas
 
-- **React Native**: Framework principal para desenvolvimento mobile.
-- **Expo**: Ferramenta para simplificar o desenvolvimento de aplicações React Native.
-- **SQLite**: Banco de dados utilizado para armazenar os registros de pontos.
-- **React Navigation**: Navegação entre telas.
-- **DateTimePicker**: Seleção de datas e horas.
+-   **React Native**: Framework principal para desenvolvimento mobile.
+-   **Expo**: Ferramenta para simplificar o desenvolvimento de aplicações React Native.
+-   **SQLite**: Banco de dados utilizado para armazenar os registros de pontos.
+-   **React Navigation**: Navegação entre telas.
+-   **DateTimePicker**: Seleção de datas e horas.
 
 ## Pré-requisitos
 
-- Node.js
-- Expo CLI
+-   Node.js
+-   Expo CLI
 
 ## Instalação
 
 1. Clone o repositório:
-   ```sh
-   git clone <URL do Repositório>
-   cd controle-ponto
-   ```
+
+    ```sh
+    git clone <URL do Repositório>
+    cd controle-ponto
+    ```
 
 2. Instale as dependências:
-   ```sh
-   npm install
-   ```
+
+    ```sh
+    npm install
+    ```
 
 3. Inicie o projeto:
-   ```sh
-   npm start
-   ```
+    ```sh
+    npm start
+    ```
 
 ## Executando o Projeto
 
@@ -62,6 +63,7 @@ npm run web
 ### Testes
 
 Para executar os testes, utilize o comando:
+
 ```sh
 npm test
 ```
@@ -69,6 +71,7 @@ npm test
 ### Lint
 
 Para verificar a formatação do código:
+
 ```sh
 npm run lint
 ```
@@ -105,4 +108,4 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE.md par
 
 ---
 
-Desenvolvido com ❤️ por [Seu Nome](https://github.com/seu-usuario).
+Desenvolvido com ❤️ por [Francisco Marcello](https://github.com/franciscoMarcello) && [Wesllen Vinicius](https://github.com/Wesllen-Vinicius)
