@@ -45,7 +45,7 @@ export function useRegistroTable() {
 
     async function show(): Promise<Registro[]> {
         try {
-            const query = 'SELECT * FROM registro';
+            const query = `SELECT * FROM registro  ORDER BY data ASC`;
             const response = (await database.getAllAsync(
                 query
             )) as unknown as DatabaseRegistro[];
