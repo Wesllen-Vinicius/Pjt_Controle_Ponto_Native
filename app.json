@@ -1,14 +1,14 @@
 {
     "expo": {
-        "name": "blank-typescript",
-        "slug": "blank-typescript",
-        "version": "1.0.0",
+        "name": "Pontual",
+        "slug": "Pontual",
+        "version": "1.0.1",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "myapp",
         "userInterfaceStyle": "automatic",
         "splash": {
-            "image": "./assets/images/splash.png",
+            "image": "./assets/images/seta-direita.png",
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
@@ -17,10 +17,10 @@
         },
         "android": {
             "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
+                "foregroundImage": "./assets/images/seta-direita.png",
                 "backgroundColor": "#ffffff"
             },
-            "package": "com.anonymous.blanktypescript"
+            "package": "com.anonymous.pontual"
         },
         "web": {
             "bundler": "metro",
@@ -32,8 +32,8 @@
             "typedRoutes": true
         },
         "updates": {
-            "fallbackToCacheTimeout": 0,
-            "checkAutomatically": "ON_LOAD"
-        }
+            "fallbackToCacheTimeout": 0
+        },
+        "assetBundlePatterns": ["**/*"]
     }
 }
