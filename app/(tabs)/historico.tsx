@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     SafeAreaView,
     StatusBar,
@@ -14,78 +14,121 @@ import Header from '@/components/Header';
 import { useDarkMode } from '@/context/DarkModeContext';
 import DatePicker from '@/components/DatePicker';
 import RecordItemHistorico from '@/components/RecordItemHistorico';
+import { useHistoryTable, Registro } from '@/database/useHistoryTable';
 
-const exampleRecords = [
-    {
-        date: '15/07/2024',
-        records: [
-            { time: '08:00', type: 'Entrada' },
-            { time: '12:00', type: 'Saída para almoço' },
-            { time: '13:00', type: 'Retorno do almoço' },
-            { time: '17:00', type: 'Saída' },
-        ],
-    },
-    {
-        date: '14/07/2024',
-        records: [
-            { time: '08:05', type: 'Entrada' },
-            { time: '17:05', type: 'Saída' },
-        ],
-    },
-];
-
-const HistoryScreen = () => {
+const HistoryScreen: React.FC = () => {
     const [expandedDay, setExpandedDay] = useState<string | null>(null);
     const [startDate, setStartDate] = useState<Date | undefined>(undefined);
     const [endDate, setEndDate] = useState<Date | undefined>(undefined);
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+    const [records, setRecords] = useState<Registro[]>([]);
     const { isDarkMode } = useDarkMode();
+    const { show } = useHistoryTable();
 
+    // Fetch records from database
+    useEffect(() => {
+        const fetchRecords = async () => {
+            try {
+                const fetchedRecords = await show();
+                setRecords(fetchedRecords);
+            } catch (error) {
+                console.error('Erro ao buscar registros:', error);
+            }
+        };
+
+        fetchRecords();
+    }, [show]);
+
+    // Toggle expanded state for a particular date
     const handleToggleExpand = (date: string) => {
         setExpandedDay(expandedDay === date ? null : date);
     };
 
-    const renderDayItem = ({ item }: { item: (typeof exampleRecords)[0] }) => (
-        <View
-            style={[
-                styles.dayContainer,
-                {
-                    backgroundColor: isDarkMode ? '#161B22' : '#FFFFFF',
-                    borderColor: isDarkMode ? '#1F1B1B' : '#DDDDDD',
-                },
-                expandedDay === item.date ? styles.selectedDay : {},
-            ]}
-        >
-            <TouchableOpacity
-                style={styles.dayHeader}
-                onPress={() => handleToggleExpand(item.date)}
+    // Filter records based on selected date range
+    const filteredRecords = records.filter((record) => {
+        const recordDate = record.data.toLocaleDateString();
+        const start = startDate ? startDate.toLocaleDateString() : '';
+        const end = endDate ? endDate.toLocaleDateString() : '';
+        return (
+            (!startDate || recordDate >= start) &&
+            (!endDate || recordDate <= end)
+        );
+    });
+
+    // Group records by date
+    const groupRecordsByDate = (records: Registro[]) => {
+        return records.reduce(
+            (groups: { [key: string]: Registro[] }, record) => {
+                const date = record.data.toLocaleDateString();
+                if (!groups[date]) {
+                    groups[date] = [];
+                }
+                groups[date].push(record);
+                return groups;
+            },
+            {}
+        );
+    };
+
+    const groupedRecords = groupRecordsByDate(filteredRecords);
+
+    // Render a single day's item
+    const renderDayItem = ({
+        item,
+    }: {
+        item: { date: string; records: Registro[] };
+    }) => {
+        return (
+            <View
+                style={[
+                    styles.dayContainer,
+                    {
+                        backgroundColor: isDarkMode ? '#161B22' : '#FFFFFF',
+                        borderColor: isDarkMode ? '#1F1B1B' : '#DDDDDD',
+                    },
+                    expandedDay === item.date ? styles.selectedDay : {},
+                ]}
             >
-                <Text
-                    style={{
-                        color: isDarkMode ? '#FFFFFF' : '#070707',
-                        fontSize: 16,
-                    }}
+                <TouchableOpacity
+                    style={styles.dayHeader}
+                    onPress={() => handleToggleExpand(item.date)}
                 >
-                    {item.date}
-                </Text>
-            </TouchableOpacity>
-            {expandedDay === item.date && (
-                <FlatList
-                    data={item.records}
-                    renderItem={({ item }) => (
-                        <RecordItemHistorico
-                            time={item.time}
-                            isDarkMode={isDarkMode}
-                            type={''}
-                        />
-                    )}
-                    keyExtractor={(record) => record.time}
-                    style={styles.recordList}
-                />
-            )}
-        </View>
-    );
+                    <Text
+                        style={{
+                            color: isDarkMode ? '#FFFFFF' : '#070707',
+                            fontSize: 16,
+                        }}
+                    >
+                        {item.date}
+                    </Text>
+                </TouchableOpacity>
+                {expandedDay === item.date && (
+                    <FlatList
+                        data={item.records}
+                        renderItem={({ item }) => (
+                            <RecordItemHistorico
+                                time={item.data.toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
+                                isDarkMode={isDarkMode}
+                                type={'Entrada/Saída'} // Ajuste isso conforme necessário
+                            />
+                        )}
+                        keyExtractor={(record) => record.id.toString()}
+                        style={styles.recordList}
+                    />
+                )}
+            </View>
+        );
+    };
+
+    // Prepare data for FlatList
+    const dayItems = Object.keys(groupedRecords).map((date) => ({
+        date,
+        records: groupedRecords[date],
+    }));
 
     return (
         <SafeAreaView
@@ -177,7 +220,7 @@ const HistoryScreen = () => {
                     </Text>
                 </TouchableOpacity>
                 <FlatList
-                    data={exampleRecords}
+                    data={dayItems}
                     renderItem={renderDayItem}
                     keyExtractor={(item) => item.date}
                 />
@@ -235,7 +278,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderTopWidth: 1,
         borderTopColor: '#DDDDDD',
-    } as ViewStyle,
+    },
     selectedDay: {
         color: '#ffffff',
         borderColor: '#A8C1FF',
