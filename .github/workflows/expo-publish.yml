@@ -18,13 +18,16 @@ jobs:
               with:
                   node-version: '16'
 
-            - name: Install Expo CLI
-              run: npm install -g expo-cli
-
             - name: Install dependencies
               run: npm install
 
-            - name: Publish to Expo
-              run: expo publish
+            - name: Install Expo CLI
+              run: npm install -g expo-cli
+
+            - name: Install EAS CLI
+              run: npm install -g eas-cli
+
+            - name: Publish to EAS Update
+              run: eas update --branch main
               env:
                   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
