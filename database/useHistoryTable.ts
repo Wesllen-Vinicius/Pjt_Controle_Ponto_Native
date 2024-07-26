@@ -1,5 +1,4 @@
 import { useSQLiteContext } from 'expo-sqlite';
-import { useState, useCallback } from 'react';
 
 export type Registro = {
     id: number;
@@ -11,44 +10,22 @@ interface DatabaseRegistro {
     data: string;
 }
 
-export function useRegistroTable() {
+export function useHistoryTable() {
     const database = useSQLiteContext();
-    const [notifyChange, setNotifyChange] = useState<() => void>(
-        () => () => {}
-    );
-
-    const setNotificationCallback = useCallback((callback: () => void) => {
-        setNotifyChange(() => callback);
-    }, []);
-
-    async function create(data: Omit<Registro, 'id'>) {
-        const statement = await database.prepareAsync(
-            'INSERT INTO registro (data) VALUES (?)'
-        );
-
-        try {
-            const result = await statement.executeAsync([
-                data.data.toISOString(),
-            ]);
-
-            const insertedRowId = result.lastInsertRowId;
-
-            notifyChange();
-
-            return { insertedRowId };
-        } catch (error) {
-            throw error;
-        } finally {
-            await statement.finalizeAsync();
-        }
-    }
 
     async function show(): Promise<Registro[]> {
+        if (!database) {
+            throw new Error('Banco de dados não disponível.');
+        }
+
+        const query = `SELECT * FROM registro ORDER BY data ASC`;
+
         try {
-            const query = `SELECT * FROM registro  ORDER BY data ASC`;
             const response = (await database.getAllAsync(
                 query
             )) as unknown as DatabaseRegistro[];
+
+            console.log('Registros retornados:', response);
 
             if (Array.isArray(response) && response.length > 0) {
                 return response.map((record) => {
@@ -58,6 +35,7 @@ export function useRegistroTable() {
                             data: new Date(record.data),
                         } as Registro;
                     } else {
+                        console.error('Registro com formato inválido:', record);
                         throw new Error('Registro com formato inválido.');
                     }
                 });
@@ -70,5 +48,5 @@ export function useRegistroTable() {
         }
     }
 
-    return { create, show, setNotificationCallback };
+    return { show };
 }

@@ -11,22 +11,63 @@ import { ThemedText } from '@/components/ThemedText';
 import Header from '@/components/Header';
 import { useDarkMode } from '@/context/DarkModeContext';
 import { ThemedView } from '@/components/ThemedView';
-import { useRegistroTable } from '@/database/useRegistroTable';
+import { useRegistroTable, Registro } from '@/database/useRegistroTable';
+import { useConfigTable, Config } from '@/database/useConfigTable';
 import DateTimePicker from '@/components/DateTimePicker';
 import RecordItem from '@/components/RecordItem';
+import {
+    calcularHorasMensaisEsperadas,
+    calcularSaldoHoras,
+} from '@/utils/calculaHoraTrabalhada';
 
-export default function TabTwoScreen() {
+const TabTwoScreen: React.FC = () => {
     const [showPicker, setShowPicker] = useState<
         'defaultTime' | 'intervalTime' | null
     >(null);
     const [date, setDate] = useState(new Date());
-    const [records, setRecords] = useState<{ id: number; data: Date }[]>([]);
+    const [records, setRecords] = useState<Registro[]>([]);
+    const [config, setConfig] = useState<Config | null>(null);
+    const [saldoHoras, setSaldoHoras] = useState<number>(0);
     const { create, show } = useRegistroTable();
+    const { show: showConfig } = useConfigTable();
     const { isDarkMode } = useDarkMode();
 
     useEffect(() => {
         loadRecords();
+        fetchConfig();
     }, []);
+
+    useEffect(() => {
+        if (config && records.length) {
+            const { saldoHoras, saldoDiario } = calcularSaldoHoras(
+                config,
+                records,
+                date
+            );
+            setSaldoHoras(saldoHoras);
+            console.log('Saldo Diário:', saldoDiario);
+        }
+    }, [config, records]);
+
+    const fetchConfig = async () => {
+        try {
+            const configData = await showConfig(1);
+            setConfig(configData);
+        } catch (error) {
+            console.error('Erro ao buscar configuração:', error);
+        }
+    };
+
+    const loadRecords = async () => {
+        try {
+            const recordsData = await show();
+            if (Array.isArray(recordsData)) {
+                setRecords(recordsData);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar registros:', error);
+        }
+    };
 
     const onChange = (event: any, selectedDate?: Date) => {
         if (event.type === 'dismissed') {
@@ -42,22 +83,9 @@ export default function TabTwoScreen() {
     const saveDate = async (selectedDate: Date) => {
         try {
             await create({ data: selectedDate });
-            console.log('Registro criado com sucesso!');
             loadRecords();
         } catch (error) {
             console.error('Erro ao salvar data:', error);
-        }
-    };
-
-    const loadRecords = async () => {
-        try {
-            const records = await show();
-            if (Array.isArray(records)) {
-                setRecords(records);
-                console.log('Registros carregados:', records);
-            }
-        } catch (error) {
-            console.error('Erro ao carregar registros:', error);
         }
     };
 
@@ -91,7 +119,22 @@ export default function TabTwoScreen() {
                         type="subtitle"
                         style={isDarkMode ? styles.darkText : styles.lightText}
                     >
-                        Banco de horas:
+                        Banco de horas: {saldoHoras.toFixed(2)} horas
+                    </ThemedText>
+                    <ThemedText
+                        type="subtitle"
+                        style={isDarkMode ? styles.darkText : styles.lightText}
+                    >
+                        Horas esperadas no mês:{' '}
+                        {config
+                            ? calcularHorasMensaisEsperadas(
+                                  config.diasdasemana,
+                                  config.horapadrao,
+                                  config.intervalopadrao,
+                                  date
+                              ).toFixed(2)
+                            : 'N/A'}{' '}
+                        horas
                     </ThemedText>
                 </ThemedView>
 
@@ -118,52 +161,56 @@ export default function TabTwoScreen() {
             />
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     floatingButton: {
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#161B22',
+        backgroundColor: '#007bff',
+        alignItems: 'center',
+        justifyContent: 'center',
         position: 'absolute',
         bottom: 20,
         right: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        shadowOffset: { width: 0, height: 2 },
     },
     buttonText: {
+        color: '#fff',
         fontSize: 24,
-        color: 'white',
     },
-    container: { flex: 1 },
+    container: {
+        flex: 1,
+    },
     content: {
         flex: 1,
         padding: 16,
-        justifyContent: 'center',
     },
-    darkBackground: { backgroundColor: '#010409' },
-    lightBackground: { backgroundColor: '#F6F8FA' },
-    stepContainer: {
-        padding: 16,
-        marginBottom: 16,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 5,
-    },
-    lightText: { color: '#070707' },
-    darkText: { color: '#FFFFFF' },
-    lightStepContainer: { backgroundColor: '#FFFFFF' },
-    darkStepContainer: { backgroundColor: '#161B22' },
     recordList: {
         marginTop: 16,
     },
+    stepContainer: {
+        padding: 16,
+        borderRadius: 8,
+    },
+    darkStepContainer: {
+        backgroundColor: '#333',
+    },
+    lightStepContainer: {
+        backgroundColor: '#fff',
+    },
+    darkBackground: {
+        backgroundColor: '#000',
+    },
+    lightBackground: {
+        backgroundColor: '#fff',
+    },
+    darkText: {
+        color: '#fff',
+    },
+    lightText: {
+        color: '#000',
+    },
 });
+
+export default TabTwoScreen;
