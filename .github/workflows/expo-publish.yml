@@ -28,6 +28,6 @@ jobs:
               run: npm install -g eas-cli
 
             - name: Publish to EAS Update
-              run: eas update --branch main
+              run: eas update --branch main --message "Automatic update from GitHub Actions"
               env:
                   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
