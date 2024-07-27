@@ -37,7 +37,7 @@ const RegistroScreen = () => {
     );
 
     const { isDarkMode } = useDarkMode();
-    const { create, show, update } = useConfigTable();
+    const { create, show, update, clearDatabase } = useConfigTable();
 
     useFocusEffect(
         useCallback(() => {
@@ -155,6 +155,21 @@ const RegistroScreen = () => {
         setConfirmedDays(selectedDays);
     };
 
+    // const handleResetConfig = async () => {
+    //     try {
+    //         await clearDatabase();
+    //         setExistingRecordData({
+    //             id: null,
+    //             horapadrao: null,
+    //             intervalopadrao: null,
+    //             diasdasemana: [],
+    //         });
+    //         console.log('Configurações redefinidas com sucesso.');
+    //     } catch (error) {
+    //         console.error('Erro ao redefinir configurações:', error);
+    //     }
+    // };
+
     return (
         <SafeAreaView
             style={[
@@ -246,6 +261,15 @@ const RegistroScreen = () => {
                         Confirmar
                     </ThemedText>
                 </TouchableOpacity>
+                {/* 
+                <TouchableOpacity
+                    style={styles.resetButton}
+                    onPress={handleResetConfig}
+                >
+                    <ThemedText type="subtitle" style={styles.resetButtonText}>
+                        Redefinir Configurações
+                    </ThemedText>
+                </TouchableOpacity> */}
                 <ShowConfigPadroes />
             </View>
             <DateTimePicker
@@ -268,29 +292,33 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
         elevation: 5,
     },
+    darkStepContainer: { backgroundColor: '#0D1117' },
+    lightStepContainer: { backgroundColor: '#FFF' },
+    darkText: { color: '#C9D1D9' },
+    lightText: { color: '#24292E' },
     confirmButton: {
-        backgroundColor: '#1C8139',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        borderRadius: 8,
+        padding: 16,
+        borderRadius: 12,
+        justifyContent: 'center',
         alignItems: 'center',
-        width: '100%',
+        backgroundColor: '#2EA043',
+        marginBottom: 16,
     },
-    confirmButtonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
+    disabledButton: { backgroundColor: '#A1A1A1' },
+    confirmButtonText: { color: '#FFF' },
+    resetButton: {
+        padding: 16,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#D73A49',
+        marginBottom: 16,
     },
-    disabledButton: {
-        backgroundColor: '#95D8A6',
-    },
-    lightText: { color: '#070707' },
-    darkText: { color: '#FFFFFF' },
-    lightStepContainer: { backgroundColor: '#FFFFFF' },
-    darkStepContainer: { backgroundColor: '#161B22' },
+    resetButtonText: { color: '#FFF' },
 });
 
 export default RegistroScreen;

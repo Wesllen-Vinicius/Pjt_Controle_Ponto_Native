@@ -137,11 +137,13 @@ const TabTwoScreen: React.FC = () => {
         const animation = animations[item.id] || new Animated.Value(0);
 
         return (
-            <View style={styles.recordContainer}>
-                <RecordItem item={item} isDarkMode={isDarkMode} />
-                <ThemedText style={styles.tipoText}>
-                    {item.tipo === 'entrada' ? 'Entrada' : 'Saída'}
-                </ThemedText>
+            <View>
+                <View style={styles.recordContainer}>
+                    <RecordItem item={item} isDarkMode={isDarkMode} />
+                    <ThemedText style={styles.tipoText}>
+                        {item.tipo === 'entrada' ? 'Entrada' : 'Saída'}
+                    </ThemedText>
+                </View>
                 {index < records.length - 1 && (
                     <View style={styles.arrowContainer}>
                         <Animated.View
@@ -161,11 +163,7 @@ const TabTwoScreen: React.FC = () => {
                             ]}
                         />
                         <Animated.View style={{ opacity: animation }}>
-                            <Icon
-                                name="arrow-down"
-                                size={24}
-                                color={isDarkMode ? '#fff' : '#000'}
-                            />
+                            <Icon name="arrow-down" size={24} color="#000" />
                         </Animated.View>
                     </View>
                 )}
@@ -244,12 +242,13 @@ const styles = StyleSheet.create({
     recordContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between', // Ajusta o alinhamento
+        justifyContent: 'space-between',
+        marginBottom: 16, // Aumenta o espaço entre os registros
     },
     line: {
         width: 2,
         height: 20,
-        backgroundColor: '#C0C0C0',
+        backgroundColor: '#000',
         marginHorizontal: 8,
     },
     arrowContainer: { flexDirection: 'column', alignItems: 'center' },
