@@ -8,7 +8,6 @@ import {
     Text,
     StyleSheet,
     ViewStyle,
-    TextStyle,
 } from 'react-native';
 import Header from '@/components/Header';
 import { useDarkMode } from '@/context/DarkModeContext';
@@ -26,26 +25,23 @@ const HistoryScreen: React.FC = () => {
     const { isDarkMode } = useDarkMode();
     const { show } = useHistoryTable();
 
-    // Fetch records from database
     useEffect(() => {
-        const fetchRecords = async () => {
-            try {
-                const fetchedRecords = await show();
-                setRecords(fetchedRecords);
-            } catch (error) {
-                console.error('Erro ao buscar registros:', error);
-            }
-        };
-
         fetchRecords();
-    }, [show]);
+    }, [startDate, endDate]);
 
-    // Toggle expanded state for a particular date
+    const fetchRecords = async () => {
+        try {
+            const fetchedRecords = await show(startDate, endDate);
+            setRecords(fetchedRecords);
+        } catch (error) {
+            console.error('Erro ao buscar registros:', error);
+        }
+    };
+
     const handleToggleExpand = (date: string) => {
         setExpandedDay(expandedDay === date ? null : date);
     };
 
-    // Filter records based on selected date range
     const filteredRecords = records.filter((record) => {
         const recordDate = record.data.toLocaleDateString();
         const start = startDate ? startDate.toLocaleDateString() : '';
@@ -56,7 +52,6 @@ const HistoryScreen: React.FC = () => {
         );
     });
 
-    // Group records by date
     const groupRecordsByDate = (records: Registro[]) => {
         return records.reduce(
             (groups: { [key: string]: Registro[] }, record) => {
@@ -73,7 +68,6 @@ const HistoryScreen: React.FC = () => {
 
     const groupedRecords = groupRecordsByDate(filteredRecords);
 
-    // Render a single day's item
     const renderDayItem = ({
         item,
     }: {
@@ -124,7 +118,6 @@ const HistoryScreen: React.FC = () => {
         );
     };
 
-    // Prepare data for FlatList
     const dayItems = Object.keys(groupedRecords).map((date) => ({
         date,
         records: groupedRecords[date],
@@ -209,6 +202,7 @@ const HistoryScreen: React.FC = () => {
                         styles.searchButton,
                         { backgroundColor: isDarkMode ? '#1F1B1B' : '#1C8139' },
                     ]}
+                    onPress={fetchRecords}
                 >
                     <Text
                         style={{
@@ -246,11 +240,17 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        borderRadius: 4,
+        borderRadius: 12,
         alignItems: 'center',
         marginHorizontal: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
     } as ViewStyle,
     searchButton: {
+        backgroundColor: '#1C8139',
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 8,
@@ -260,14 +260,14 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     dayContainer: {
         marginBottom: 8,
-        borderRadius: 8,
+        borderRadius: 12,
         overflow: 'hidden',
         width: '100%',
         borderWidth: 1,
     } as ViewStyle,
     dayHeader: {
         padding: 16,
-        borderRadius: 8,
+        borderRadius: 12,
         width: '100%',
         justifyContent: 'center',
         borderBottomWidth: 1,

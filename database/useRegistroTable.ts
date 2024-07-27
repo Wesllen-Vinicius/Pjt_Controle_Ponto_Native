@@ -70,5 +70,20 @@ export function useRegistroTable() {
         }
     }
 
-    return { create, show, setNotificationCallback };
+    async function clearDatabase() {
+        const statement = await database.prepareAsync('DELETE FROM registro');
+
+        try {
+            await statement.executeAsync([]);
+            notifyChange();
+            console.log('Banco de dados limpo com sucesso.');
+        } catch (error) {
+            console.error('Erro ao limpar banco de dados:', error);
+            throw error;
+        } finally {
+            await statement.finalizeAsync();
+        }
+    }
+
+    return { create, show, setNotificationCallback, clearDatabase };
 }

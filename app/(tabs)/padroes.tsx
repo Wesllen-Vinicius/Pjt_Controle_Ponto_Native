@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     SafeAreaView,
     StatusBar,
@@ -14,9 +14,9 @@ import { useDarkMode } from '@/context/DarkModeContext';
 import { useConfigTable } from '@/database/useConfigTable';
 import ShowConfigPadroes from '@/components/ShowConfigPadroes';
 import DateTimePicker from '@/components/DateTimePicker';
-
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import TimePickerButton from '@/components/TimePickerButton';
+import { useFocusEffect } from '@react-navigation/native';
 
 const RegistroScreen = () => {
     const [showPicker, setShowPicker] = useState<
@@ -39,9 +39,11 @@ const RegistroScreen = () => {
     const { isDarkMode } = useDarkMode();
     const { create, show, update } = useConfigTable();
 
-    useEffect(() => {
-        fetchExistingRecord();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            fetchExistingRecord();
+        }, [])
+    );
 
     useEffect(() => {
         setIsConfirmButtonDisabled(!hasChanges());

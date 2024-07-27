@@ -6,6 +6,9 @@ import {
     SafeAreaView,
     StatusBar,
     FlatList,
+    Animated,
+    Easing,
+    Alert,
 } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import Header from '@/components/Header';
@@ -19,6 +22,8 @@ import {
     calcularHorasMensaisEsperadas,
     calcularSaldoHoras,
 } from '@/utils/calculaHoraTrabalhada';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { useFocusEffect } from '@react-navigation/native';
 
 const TabTwoScreen: React.FC = () => {
     const [showPicker, setShowPicker] = useState<
@@ -28,30 +33,54 @@ const TabTwoScreen: React.FC = () => {
     const [records, setRecords] = useState<Registro[]>([]);
     const [config, setConfig] = useState<Config | null>(null);
     const [saldoHoras, setSaldoHoras] = useState<number>(0);
+    const [animations, setAnimations] = useState<{
+        [key: number]: Animated.Value;
+    }>({});
     const { create, show } = useRegistroTable();
     const { show: showConfig } = useConfigTable();
     const { isDarkMode } = useDarkMode();
 
-    useEffect(() => {
-        loadRecords();
-        fetchConfig();
-    }, []);
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchConfig();
+            loadRecords();
+        }, [])
+    );
 
     useEffect(() => {
         if (config && records.length) {
-            const { saldoHoras, saldoDiario } = calcularSaldoHoras(
+            const { saldoHoras: saldo, saldoDiario } = calcularSaldoHoras(
                 config,
                 records,
                 date
             );
-            setSaldoHoras(saldoHoras);
+            // Conversão para número e atualização do estado
+            setSaldoHoras(parseFloat(saldo.toFixed(2)));
             console.log('Saldo Diário:', saldoDiario);
         }
     }, [config, records]);
 
+    useEffect(() => {
+        const newAnimations: { [key: number]: Animated.Value } = {};
+        records.forEach((record) => {
+            newAnimations[record.id] = new Animated.Value(0);
+        });
+        setAnimations(newAnimations);
+
+        Object.values(newAnimations).forEach((animation) => {
+            Animated.timing(animation, {
+                toValue: 1,
+                duration: 500,
+                easing: Easing.inOut(Easing.ease),
+                useNativeDriver: true,
+            }).start();
+        });
+    }, [records]);
+
     const fetchConfig = async () => {
         try {
             const configData = await showConfig(1);
+            console.log('Configuração carregada:', configData);
             setConfig(configData);
         } catch (error) {
             console.error('Erro ao buscar configuração:', error);
@@ -83,16 +112,60 @@ const TabTwoScreen: React.FC = () => {
     const saveDate = async (selectedDate: Date) => {
         try {
             await create({ data: selectedDate });
-            loadRecords();
+            await loadRecords();
         } catch (error) {
             console.error('Erro ao salvar data:', error);
         }
     };
 
     const handlePress = () => {
+        if (!config) {
+            Alert.alert(
+                'Atenção',
+                'Defina os padrões antes de criar um registro.'
+            );
+            return;
+        }
         const currentDate = new Date();
         setDate(currentDate);
         setShowPicker('defaultTime');
+    };
+
+    const renderItem = ({ item, index }: { item: Registro; index: number }) => {
+        const animation = animations[item.id] || new Animated.Value(0);
+
+        return (
+            <View style={styles.recordContainer}>
+                <RecordItem item={item} isDarkMode={isDarkMode} />
+                {index < records.length - 1 && (
+                    <View style={styles.arrowContainer}>
+                        <Animated.View
+                            style={[
+                                styles.line,
+                                {
+                                    opacity: animation,
+                                    transform: [
+                                        {
+                                            translateY: animation.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [-20, 0],
+                                            }),
+                                        },
+                                    ],
+                                },
+                            ]}
+                        />
+                        <Animated.View style={{ opacity: animation }}>
+                            <Icon
+                                name="arrow-down"
+                                size={24}
+                                color={isDarkMode ? '#fff' : '#000'}
+                            />
+                        </Animated.View>
+                    </View>
+                )}
+            </View>
+        );
     };
 
     return (
@@ -137,17 +210,13 @@ const TabTwoScreen: React.FC = () => {
                         horas
                     </ThemedText>
                 </ThemedView>
-
                 <FlatList
                     data={records}
-                    renderItem={({ item }) => (
-                        <RecordItem item={item} isDarkMode={isDarkMode} />
-                    )}
+                    renderItem={renderItem}
                     keyExtractor={(item) => item.id.toString()}
                     style={styles.recordList}
                 />
             </View>
-
             <TouchableOpacity
                 style={styles.floatingButton}
                 onPress={handlePress}
@@ -164,53 +233,45 @@ const TabTwoScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+    container: { flex: 1 },
+    content: { flex: 1, padding: 16 },
+    recordList: { marginTop: 16 },
+    recordContainer: { flexDirection: 'row', alignItems: 'center' },
+    line: {
+        width: 2,
+        height: 20,
+        backgroundColor: '#C0C0C0',
+        marginHorizontal: 8,
+    },
+    arrowContainer: { flexDirection: 'column', alignItems: 'center' },
+    stepContainer: {
+        padding: 16,
+        marginBottom: 16,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    darkStepContainer: { backgroundColor: '#161B22' },
+    lightStepContainer: { backgroundColor: '#FFFFFF' },
+    darkBackground: { backgroundColor: '#010409' },
+    lightBackground: { backgroundColor: '#F6F8FA' },
+    darkText: { color: '#FFFFFF' },
+    lightText: { color: '#070707' },
     floatingButton: {
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#007bff',
+        backgroundColor: '#1C8139',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'absolute',
         bottom: 20,
         right: 20,
     },
-    buttonText: {
-        color: '#fff',
-        fontSize: 24,
-    },
-    container: {
-        flex: 1,
-    },
-    content: {
-        flex: 1,
-        padding: 16,
-    },
-    recordList: {
-        marginTop: 16,
-    },
-    stepContainer: {
-        padding: 16,
-        borderRadius: 8,
-    },
-    darkStepContainer: {
-        backgroundColor: '#333',
-    },
-    lightStepContainer: {
-        backgroundColor: '#fff',
-    },
-    darkBackground: {
-        backgroundColor: '#000',
-    },
-    lightBackground: {
-        backgroundColor: '#fff',
-    },
-    darkText: {
-        color: '#fff',
-    },
-    lightText: {
-        color: '#000',
-    },
+    buttonText: { color: '#fff', fontSize: 24 },
 });
 
 export default TabTwoScreen;
