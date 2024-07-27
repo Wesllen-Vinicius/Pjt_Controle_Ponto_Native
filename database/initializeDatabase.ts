@@ -5,7 +5,8 @@ export async function initializeDatabase(database: SQLiteDatabase) {
         await database.execAsync(
             `CREATE TABLE IF NOT EXISTS registro (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                data DATETIME NOT NULL
+                data DATETIME NOT NULL,
+                tipo TEXT NOT NULL CHECK(tipo IN ('entrada', 'saida'))
             );`
         );
         await database.execAsync(

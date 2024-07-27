@@ -236,20 +236,20 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     } as ViewStyle,
     dateInput: {
-        borderWidth: 0.2,
         flex: 1,
         paddingVertical: 12,
         paddingHorizontal: 16,
-        borderRadius: 12,
+        borderRadius: 8,
         alignItems: 'center',
         marginHorizontal: 8,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 5,
     } as ViewStyle,
     searchButton: {
+        elevation: 5,
         backgroundColor: '#1C8139',
         paddingVertical: 12,
         paddingHorizontal: 16,
@@ -267,10 +267,8 @@ const styles = StyleSheet.create({
     } as ViewStyle,
     dayHeader: {
         padding: 16,
-        borderRadius: 12,
         width: '100%',
         justifyContent: 'center',
-        borderBottomWidth: 1,
         borderBottomColor: '#000000',
     } as ViewStyle,
     recordList: {
@@ -281,7 +279,6 @@ const styles = StyleSheet.create({
     },
     selectedDay: {
         color: '#ffffff',
-        borderColor: '#A8C1FF',
         borderWidth: 2,
     },
 });

@@ -17,13 +17,13 @@ import { ThemedView } from '@/components/ThemedView';
 import { useRegistroTable, Registro } from '@/database/useRegistroTable';
 import { useConfigTable, Config } from '@/database/useConfigTable';
 import DateTimePicker from '@/components/DateTimePicker';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { useFocusEffect } from '@react-navigation/native';
 import RecordItem from '@/components/RecordItem';
 import {
     calcularHorasMensaisEsperadas,
     calcularSaldoHoras,
 } from '@/utils/calculaHoraTrabalhada';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import { useFocusEffect } from '@react-navigation/native';
 
 const TabTwoScreen: React.FC = () => {
     const [showPicker, setShowPicker] = useState<
@@ -36,7 +36,7 @@ const TabTwoScreen: React.FC = () => {
     const [animations, setAnimations] = useState<{
         [key: number]: Animated.Value;
     }>({});
-    const { create, show } = useRegistroTable();
+    const { create, show, clearDatabase } = useRegistroTable();
     const { show: showConfig } = useConfigTable();
     const { isDarkMode } = useDarkMode();
 
@@ -54,7 +54,6 @@ const TabTwoScreen: React.FC = () => {
                 records,
                 date
             );
-            // Conversão para número e atualização do estado
             setSaldoHoras(parseFloat(saldo.toFixed(2)));
             console.log('Saldo Diário:', saldoDiario);
         }
@@ -111,7 +110,10 @@ const TabTwoScreen: React.FC = () => {
 
     const saveDate = async (selectedDate: Date) => {
         try {
-            await create({ data: selectedDate });
+            await create({
+                data: selectedDate,
+                tipo: 'entrada',
+            });
             await loadRecords();
         } catch (error) {
             console.error('Erro ao salvar data:', error);
@@ -137,6 +139,9 @@ const TabTwoScreen: React.FC = () => {
         return (
             <View style={styles.recordContainer}>
                 <RecordItem item={item} isDarkMode={isDarkMode} />
+                <ThemedText style={styles.tipoText}>
+                    {item.tipo === 'entrada' ? 'Entrada' : 'Saída'}
+                </ThemedText>
                 {index < records.length - 1 && (
                     <View style={styles.arrowContainer}>
                         <Animated.View
@@ -236,7 +241,11 @@ const styles = StyleSheet.create({
     container: { flex: 1 },
     content: { flex: 1, padding: 16 },
     recordList: { marginTop: 16 },
-    recordContainer: { flexDirection: 'row', alignItems: 'center' },
+    recordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between', // Ajusta o alinhamento
+    },
     line: {
         width: 2,
         height: 20,
@@ -272,6 +281,11 @@ const styles = StyleSheet.create({
         right: 20,
     },
     buttonText: { color: '#fff', fontSize: 24 },
+    tipoText: {
+        fontSize: 16,
+        color: '#666',
+        marginHorizontal: 8,
+    },
 });
 
 export default TabTwoScreen;
