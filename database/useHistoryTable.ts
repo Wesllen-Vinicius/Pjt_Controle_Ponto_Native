@@ -13,16 +13,34 @@ interface DatabaseRegistro {
 export function useHistoryTable() {
     const database = useSQLiteContext();
 
-    async function show(): Promise<Registro[]> {
+    async function show(startDate?: Date, endDate?: Date): Promise<Registro[]> {
         if (!database) {
             throw new Error('Banco de dados não disponível.');
         }
 
-        const query = `SELECT * FROM registro ORDER BY data ASC`;
+        let whereClause = '';
+        const queryParams: (string | number)[] = [];
+
+        if (startDate) {
+            whereClause += 'data >= ?';
+            queryParams.push(startDate.toISOString());
+        }
+        if (endDate) {
+            if (whereClause.length > 0) {
+                whereClause += ' AND ';
+            }
+            whereClause += 'data <= ?';
+            queryParams.push(endDate.toISOString());
+        }
+
+        const query = `SELECT * FROM registro${
+            whereClause ? ` WHERE ${whereClause}` : ''
+        } ORDER BY data DESC`;
 
         try {
             const response = (await database.getAllAsync(
-                query
+                query,
+                queryParams
             )) as unknown as DatabaseRegistro[];
 
             console.log('Registros retornados:', response);
