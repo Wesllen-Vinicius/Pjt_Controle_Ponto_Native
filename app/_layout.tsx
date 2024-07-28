@@ -1,7 +1,6 @@
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import * as Updates from 'expo-updates';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { SQLiteProvider } from 'expo-sqlite';
@@ -17,21 +16,8 @@ export default function RootLayout() {
     });
 
     useEffect(() => {
-        const checkForUpdates = async () => {
-            try {
-                const update = await Updates.checkForUpdateAsync();
-                if (update.isAvailable) {
-                    await Updates.fetchUpdateAsync();
-                    await Updates.reloadAsync();
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        };
-
         if (loaded) {
             SplashScreen.hideAsync();
-            checkForUpdates();
         }
     }, [loaded]);
 

@@ -140,13 +140,17 @@ const RegistroScreen = () => {
     };
 
     const createRecord = async () => {
-        const { insertedRowId } = await create({
-            horapadrao: defaultTime || new Date(),
-            intervalopadrao: intervalTime || new Date(),
-            diasdasemana: selectedDays,
-        });
-        setExistingRecordId(insertedRowId);
-        console.log('Registro criado com sucesso!');
+        try {
+            const { insertedRowId } = await create({
+                horapadrao: defaultTime || new Date(),
+                intervalopadrao: intervalTime || new Date(),
+                diasdasemana: selectedDays,
+            });
+            setExistingRecordId(insertedRowId);
+            console.log('Registro criado com sucesso!');
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     const setConfirmedState = () => {
@@ -262,14 +266,14 @@ const RegistroScreen = () => {
                     </ThemedText>
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={styles.resetButton}
-                    // onPress={handleResetConfig}
+                    onPress={handleResetConfig}
                 >
                     <ThemedText type="subtitle" style={styles.resetButtonText}>
                         Redefinir Configurações
                     </ThemedText>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <ShowConfigPadroes />
             </View>
             <DateTimePicker

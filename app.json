@@ -1,14 +1,14 @@
 {
     "expo": {
-        "name": "Pontual",
-        "slug": "Pontual",
-        "version": "1.0.4",
+        "name": "blank-typescript",
+        "slug": "blank-typescript",
+        "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "myapp",
         "userInterfaceStyle": "automatic",
         "splash": {
-            "image": "./assets/images/seta-direita.png",
+            "image": "./assets/images/splash.png",
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
@@ -17,10 +17,10 @@
         },
         "android": {
             "adaptiveIcon": {
-                "foregroundImage": "./assets/images/seta-direita.png",
+                "foregroundImage": "./assets/images/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             },
-            "package": "com.anonymous.pontual"
+            "package": "com.anonymous.blanktypescript"
         },
         "web": {
             "bundler": "metro",
@@ -30,24 +30,6 @@
         "plugins": ["expo-router"],
         "experiments": {
             "typedRoutes": true
-        },
-        "updates": {
-            "enabled": true,
-            "checkAutomatically": "ON_LOAD",
-            "fallbackToCacheTimeout": 0,
-            "url": "https://u.expo.dev/14d682f5-555c-4312-ae93-9d4dd36faf03"
-        },
-        "assetBundlePatterns": ["**/*"],
-        "extra": {
-            "router": {
-                "origin": false
-            },
-            "eas": {
-                "projectId": "14d682f5-555c-4312-ae93-9d4dd36faf03"
-            }
-        },
-        "runtimeVersion": {
-            "policy": "appVersion"
         }
     }
 }
