@@ -159,20 +159,20 @@ const RegistroScreen = () => {
         setConfirmedDays(selectedDays);
     };
 
-    const handleResetConfig = async () => {
-        try {
-            await clearDatabase();
-            setExistingRecordData({
-                id: null,
-                horapadrao: null,
-                intervalopadrao: null,
-                diasdasemana: [],
-            });
-            console.log('Configurações redefinidas com sucesso.');
-        } catch (error) {
-            console.error('Erro ao redefinir configurações:', error);
-        }
-    };
+    // const handleResetConfig = async () => {
+    //     try {
+    //         await clearDatabase();
+    //         setExistingRecordData({
+    //             id: null,
+    //             horapadrao: null,
+    //             intervalopadrao: null,
+    //             diasdasemana: [],
+    //         });
+    //         console.log('Configurações redefinidas com sucesso.');
+    //     } catch (error) {
+    //         console.error('Erro ao redefinir configurações:', error);
+    //     }
+    // };
 
     return (
         <SafeAreaView
@@ -266,14 +266,14 @@ const RegistroScreen = () => {
                     </ThemedText>
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={styles.resetButton}
                     onPress={handleResetConfig}
                 >
                     <ThemedText type="subtitle" style={styles.resetButtonText}>
                         Redefinir Configurações
                     </ThemedText>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <ShowConfigPadroes />
             </View>
             <DateTimePicker
