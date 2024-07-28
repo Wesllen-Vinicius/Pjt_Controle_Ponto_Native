@@ -261,15 +261,15 @@ const RegistroScreen = () => {
                         Confirmar
                     </ThemedText>
                 </TouchableOpacity>
-                {/* 
+
                 <TouchableOpacity
                     style={styles.resetButton}
-                    onPress={handleResetConfig}
+                    // onPress={handleResetConfig}
                 >
                     <ThemedText type="subtitle" style={styles.resetButtonText}>
                         Redefinir Configurações
                     </ThemedText>
-                </TouchableOpacity> */}
+                </TouchableOpacity>
                 <ShowConfigPadroes />
             </View>
             <DateTimePicker

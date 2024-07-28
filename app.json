@@ -2,7 +2,7 @@
     "expo": {
         "name": "Pontual",
         "slug": "Pontual",
-        "version": "1.0.1",
+        "version": "1.0.3",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
         "scheme": "myapp",
@@ -34,7 +34,8 @@
         "updates": {
             "enabled": true,
             "checkAutomatically": "ON_LOAD",
-            "fallbackToCacheTimeout": 0
+            "fallbackToCacheTimeout": 0,
+            "url": "https://u.expo.dev/14d682f5-555c-4312-ae93-9d4dd36faf03"
         },
         "assetBundlePatterns": ["**/*"],
         "extra": {
@@ -44,6 +45,9 @@
             "eas": {
                 "projectId": "14d682f5-555c-4312-ae93-9d4dd36faf03"
             }
+        },
+        "runtimeVersion": {
+            "policy": "appVersion"
         }
     }
 }
